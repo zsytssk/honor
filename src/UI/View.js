@@ -84,7 +84,27 @@ const DirectorView = {
         }
     },
 
-    setLoadView (type, url) {
+    setLoadView (type, url, callback) {
+        // let dialog = DirectorView.getViewByPool(typeof url === "function" ? url.name : url);
+        // if(dialog){
+        //     params && dialog.onMounted.apply(dialog, params);
+        //     DialogManager.openDialogByClass(config, dialog);
+        //     return;
+        // }
+        // switch(typeof url){
+		// 	case "function":
+        //         dialog = new url;
+        //         params && dialog.onMounted.apply(dialog, params);
+        //         if(!dialog._$needWaitForData){
+        //             DialogManager.openDialogByClass(config, dialog);
+        //         }else{
+        //             dialog.once("onViewCreated", DialogManager, DialogManager.openDialogByClass, [config, dialog]);
+        //         }
+		// 		break;
+		// 	case "string":
+        //         LoaderManager.load("Dialog", url, Laya.Handler.create(DialogManager, DialogManager.openDialogByData, [url, params, config]));
+		// 		break;
+		// }
         switch(typeof url){
 			case "function":
                 let view = new url;

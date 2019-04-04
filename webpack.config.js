@@ -13,7 +13,8 @@ module.exports = {
     },
 
     output: {
-        path: `${__dirname}/dist/`,
+        path: `D:\\Projects\\legend_demo\\bin\\libs`,
+        // path: `${__dirname}/dist/`,
         // path:`${__dirname}/example/test_new_framwork/libs`,
         filename: '[name].js',
         library: 'Honor',

@@ -86,12 +86,12 @@ const Director = {
         DialogManager.closeAll();
     },
 
-    setLoadPageForScene (url) {
-        DirectorView.setLoadView("Scene", url);
+    setLoadPageForScene (url, callback) {
+        DirectorView.setLoadView("Scene", url, callback);
     },
 
-    setLoadPageForDialog (url) {
-        DirectorView.setLoadView("Dialog", url);
+    setLoadPageForDialog (url, callback) {
+        DirectorView.setLoadView("Dialog", url, callback);
     }
 }
 

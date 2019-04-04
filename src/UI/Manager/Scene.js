@@ -8,10 +8,15 @@ const SceneManager = {
     },
 
     _onResize (width, height) {
-        this._curScene && this._curScene.onResize(width, height);
+        if(this._curScene){
+            this._curScene.size(width, height);
+            this._curScene.onResize(width, height);
+        }
     },
 
     switchScene (params, scene) {
+        const {width, height} = Laya.stage;
+        scene.size(width, height);
         scene.onOpened && scene.onOpened.apply(scene, params);
         DirectorView.addView("Scene", scene);
     

@@ -4,6 +4,7 @@ import cutStr from "./cutStr";
 import getStringLength from "./getStringLength";
 import formatTime from "./formatTime";
 import formatMoney from "./formatMoney";
+import getHtmlElementSize from "./getHtmlElementSize";
 
 export default {
     createSkeleton,
@@ -11,5 +12,6 @@ export default {
     cutStr,
     getStringLength,
     formatTime,
-    formatMoney
+    formatMoney,
+    getHtmlElementSize
 }
