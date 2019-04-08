@@ -1,3 +1,5 @@
+import LoaderManager from "./Manager/Loader";
+
 const VIEW_MAP = ["SceneManager", "DialogManager", "LoadManager", "AlertManager"];
 const LOAD_VIEW_MAP = {
     "Scene" : null,
@@ -27,23 +29,30 @@ const DirectorView = {
 
         for(let i in LOAD_VIEW_MAP){
             let view = LOAD_VIEW_MAP[i];
-            view && view.onResize && view.onResize(width, height);
+            if(view){
+                view.size(width, height);
+                view.onResize && view.onResize(width, height);
+            }
         }
     },
 
-    _createLoadViewByClass (loadType, view) {
+    _createLoadViewByClass (loadType, callback, view) {
+        const {width, height} = Laya.stage;
+        view.size(width, height);
+        view.onReset && view.onReset();
         this.addView("Load", view);
         LOAD_VIEW_MAP[loadType] = view;
+        callback && callback.run();
     },
 
-    _createLoadViewByData (type, url, obj) {
+    _createLoadViewByData (type, url, callback, obj) {
         if (!obj) {throw `Can not find "Scene":${url}`;}
         if (!obj.props) {throw `"Scene" data is error:${url}`;}
         
         var runtime = obj.props.runtime ? obj.props.runtime : obj.type;
         var clas = Laya.ClassUtils.getClass(runtime);
 
-        this.createView(obj, clas, url, Laya.Handler.create(this, this._createLoadViewByClass, [type]));
+        this.createView(obj, clas, url, null, Laya.Handler.create(this, this._createLoadViewByClass, [type, callback]));
     },
 
     recoverView (view) {
@@ -85,40 +94,32 @@ const DirectorView = {
     },
 
     setLoadView (type, url, callback) {
-        // let dialog = DirectorView.getViewByPool(typeof url === "function" ? url.name : url);
-        // if(dialog){
-        //     params && dialog.onMounted.apply(dialog, params);
-        //     DialogManager.openDialogByClass(config, dialog);
-        //     return;
-        // }
+        // LoaderManager.load(null, url, Laya.Handler.create(this, (type, url, callback, obj) => {
+        //     console.log(`${type} view loaded`);
+        //     this._createLoadViewByData(type, url, obj, callback);
+        // }, [type, url, callback]));
+        LoaderManager.load(null, url, Laya.Handler.create(this, this._createLoadViewByData, [type, url, callback]));
         // switch(typeof url){
 		// 	case "function":
-        //         dialog = new url;
-        //         params && dialog.onMounted.apply(dialog, params);
-        //         if(!dialog._$needWaitForData){
-        //             DialogManager.openDialogByClass(config, dialog);
-        //         }else{
-        //             dialog.once("onViewCreated", DialogManager, DialogManager.openDialogByClass, [config, dialog]);
-        //         }
+        //         let view = new url;
+        //         view.once("onViewCreated", this, this._createLoadViewByClass, [type]);
 		// 		break;
 		// 	case "string":
-        //         LoaderManager.load("Dialog", url, Laya.Handler.create(DialogManager, DialogManager.openDialogByData, [url, params, config]));
+        //         LoaderManager.load(null, url, Laya.Handler.create(this, this._createLoadViewByData, [type, url]));
 		// 		break;
 		// }
-        switch(typeof url){
-			case "function":
-                let view = new url;
-                view.once("onViewCreated", this, this._createLoadViewByClass, [type]);
-				break;
-			case "string":
-                LoaderManager.load(null, url, Laya.Handler.create(this, this._createLoadViewByData, [type, url]));
-				break;
-		}
     },
 
     setLoadViewVisible (type, visible) {
         let view = LOAD_VIEW_MAP[type];
-        view && (LOAD_VIEW_MAP[type].visible = visible);
+        if(view && !view.destroyed){
+            view.visible = visible;
+            if(visible){
+                view.onShow && view.onShow();
+            }else{
+                view.onReset && view.onReset();
+            }
+        }
     },
 
     setLoadProgress (type, val) {
