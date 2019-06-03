@@ -1,5 +1,5 @@
 import DirectorView, { ViewType } from '../View';
-import { loadRes, ResItem } from 'honor/Utils/load';
+import { loadRes, ResItem } from '../../Utils/load';
 
 export type SceneCtor = typeof Laya.Scene | Laya.Dialog;
 type LoadSceneCompleteFn = (scene: SceneCtor) => void;
@@ -56,7 +56,7 @@ const LoaderManager = {
         type: ViewType,
         url: string,
         loader: Laya.SceneLoader,
-        complete_fn: LoadSceneCompleteFn,
+        complete_fn: LoadSceneCompleteFn
     ) {
         loader.off(Laya.Event.PROGRESS, null, this.onLoadProgress);
         const obj = Laya.Loader.getRes(url);

@@ -2,7 +2,7 @@ import SceneManager from './Manager/Scene';
 import LoaderManager, { SceneCtor } from './Manager/Loader';
 import DirectorView from './View';
 import { HonorDialogConfig } from './Base/Dialog';
-import { DialogManager } from 'honor/state';
+import { DialogManager } from '../state';
 
 const Director = {
     init() {
@@ -31,7 +31,7 @@ const Director = {
         url,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false,
+        use_exist = false
     ) {
         return DialogManager.openDialog(url, params, config, use_exist);
     },

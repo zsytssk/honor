@@ -1,76 +1,58 @@
 'use strict';
-
+const path = require('path');
 const webpack = require('webpack');
-const exec = require('child_process').exec;
 
-module.exports = {
-    mode: 'development',
-
-    context: `${__dirname}/src/`,
-
+let common_config = {
     entry: {
-        honor: './Honor.js'
+        main: './src/honor.ts',
     },
-
     output: {
-        path: `D:\\Projects\\legend_demo\\bin\\libs`,
-        // path: `${__dirname}/dist/`,
-        // path:`${__dirname}/example/test_new_framwork/libs`,
-        filename: '[name].js',
-        library: 'Honor',
+        filename: 'honor.js',
+        path: path.join(__dirname, 'dist'),
+        library: 'honor',
         libraryTarget: 'umd',
-        sourceMapFilename: '[file].map',
-        devtoolModuleFilenameTemplate: 'webpack:///[resource-path]', // string
-        devtoolFallbackModuleFilenameTemplate: 'webpack:///[resource-path]?[hash]', // string
-        umdNamedDefine: true
+    },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js'],
     },
     module: {
         rules: [
             {
-                test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: ['babel-loader']
-            }
-        ]
+                test: /\.(.*)?$/,
+                loader: 'ts-loader',
+                options: {
+                    compilerOptions: {
+                        target: 'es5',
+                    },
+                    transpileOnly: true,
+                },
+            },
+        ],
     },
-    // module: {
-    //     loaders: [
-    //         {
-    //             test: /\.json$/,
-    //             loader: "json"
-    //         },
-    //         {
-    //             test: /\.js$/,
-    //             exclude: /node_modules/,
-    //             loader: 'babel-loader',//在webpack的module部分的loaders里进行配置即可
-    //             query: {
-    //                 presets: ['latest']
-    //             }
-    //         }
-    //     ]
-    // },
+};
 
-    performance: { hints: false },
+const dev_config = {
+    devtool: 'eval-source-map',
+    watch: true,
+    devServer: {
+        contentBase: path.join(__dirname, './'),
+        hot: true,
+        host: '0.0.0.0',
+    },
+    plugins: [new webpack.HotModuleReplacementPlugin()],
+};
 
-    // plugins: [
-    //     new webpack.DefinePlugin({
-    //         "typeof CANVAS_RENDERER": JSON.stringify(true),
-    //         "typeof WEBGL_RENDERER": JSON.stringify(true),
-    //         "typeof EXPERIMENTAL": JSON.stringify(true),
-    //         "typeof PLUGIN_CAMERA3D": JSON.stringify(false),
-    //         "typeof PLUGIN_FBINSTANT": JSON.stringify(false)
-    //     }),
-    //     {
-    //         apply: (compiler) => {
-    //             compiler.hooks.afterEmit.tap('AfterEmitPlugin', (compilation) => {
-    //                 exec('node scripts/copy-to-examples.js', (err, stdout, stderr) => {
-    //                     if (stdout) process.stdout.write(stdout);
-    //                     if (stderr) process.stderr.write(stderr);
-    //                 });
-    //             });
-    //         }
-    //     }
-    // ],
+const prod_ts_compile_option = {
+    target: 'es5',
+    sourceMap: false,
+    lib: ['dom', 'es5', 'es2015.promise'],
+};
 
-    devtool: 'source-map'
+module.exports = (env, argv) => {
+    if (argv.mode === 'development') {
+        return Object.assign(common_config, dev_config);
+    } else {
+        common_config.module.rules[0].options.compilerOptions = prod_ts_compile_option;
+        return common_config;
+    }
 };

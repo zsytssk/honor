@@ -1,7 +1,0 @@
-<page>
-   <item name="test/TestScene.scene" props="" ifExport="分离模式" aName=""/>
-   <item name="test/testDialog.scene" props="" ifExport="分离模式" aName=""/>
-   <item name="dialog/TestDialog1.scene" props="" ifExport="内嵌模式" aName="内嵌模式"/>
-   <item name="dialog/TestDialog2.scene" props="" ifExport="分离模式" aName="分离模式URL"/>
-   <item name="dialog/TestDialog3.scene" props="" ifExport="分离模式" aName="分离模式Class"/>
-</page>
