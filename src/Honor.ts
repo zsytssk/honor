@@ -1,8 +1,8 @@
+import { initState } from './state';
 import { Director } from './UI/Director';
 import { LoaderManager } from './UI/Manager/Loader';
 import * as sceneChangeMonitor from './Utils/sceneChangeMonitor';
-import { initState } from './state';
-import { DirectorView } from './UI/View';
+import { Utils } from './utils/index';
 
 const name = 'Honor';
 const version = '0.0.1-beta';
@@ -68,7 +68,7 @@ function run(GameConfig, callback) {
         Laya.Handler.create(null, () => {
             initState();
             callback();
-        })
+        }),
     );
 }
 export const Honor = {
@@ -77,6 +77,7 @@ export const Honor = {
     run,
     director: Director,
     load,
+    Utils,
     sceneChangeMonitor,
     DEBUG_MODE,
 };
@@ -87,6 +88,7 @@ export {
     run,
     Director as director,
     load,
+    Utils,
     sceneChangeMonitor,
     DEBUG_MODE,
 };
