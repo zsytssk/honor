@@ -1,9 +1,8 @@
-import director from './UI/Director';
-import Utils from './Utils';
-import LoaderManager from './UI/Manager/Loader';
+import { Director } from './UI/Director';
+import { LoaderManager } from './UI/Manager/Loader';
 import * as sceneChangeMonitor from './Utils/sceneChangeMonitor';
 import { initState } from './state';
-import DirectorView from './UI/View';
+import { DirectorView } from './UI/View';
 
 const name = 'Honor';
 const version = '0.0.1-beta';
@@ -14,10 +13,14 @@ let DEBUG_MODE = false;
 
 declare global {
     interface Window {
-        Laya3D: Laya3D;
+        Laya3D: any;
     }
 }
 
+/** 运行游戏
+ * @param GameConfig 是Laya自动生成的游戏配置 src/GameConfig
+ * @param callback 游戏运行完成之后执行函数
+ */
 function run(GameConfig, callback) {
     if (!callback) {
         console.error('需要引擎启动以后的回调函数，用来启动起始页等');
@@ -65,28 +68,25 @@ function run(GameConfig, callback) {
         Laya.Handler.create(null, () => {
             initState();
             callback();
-        }),
+        })
     );
 }
 export const Honor = {
     name,
     version,
     run,
-    director,
-    Utils,
+    director: Director,
     load,
     sceneChangeMonitor,
-    DirectorView,
     DEBUG_MODE,
 };
+
 export {
     name,
     version,
     run,
-    director,
-    Utils,
+    Director as director,
     load,
     sceneChangeMonitor,
-    DirectorView,
     DEBUG_MODE,
 };

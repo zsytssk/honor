@@ -1,4 +1,4 @@
-import DirectorView, { ViewType } from '../View';
+import { ViewType, DirectorView } from '../View';
 import { loadRes, ResItem } from '../../Utils/load';
 
 export type SceneCtor = typeof Laya.Scene | Laya.Dialog;
@@ -6,7 +6,7 @@ type LoadSceneCompleteFn = (scene: SceneCtor) => void;
 const state = {
     is_loading: false,
 };
-const LoaderManager = {
+export const LoaderManager = {
     __init__() {},
     loadScene(type: ViewType, url: string, complete_fn: LoadSceneCompleteFn) {
         const sceneData = Laya.Loader.getRes(url);
@@ -80,5 +80,3 @@ const LoaderManager = {
         }, time);
     },
 };
-
-export default LoaderManager;

@@ -1,12 +1,12 @@
-import DirectorView, { HonorScene } from '../View';
-import LoaderManager, { SceneCtor } from './Loader';
+import { HonorScene, DirectorView } from '../View';
+import { SceneCtor, LoaderManager } from './Loader';
 
 export type SceneChangeListener = (
     cur1: string,
-    cur2: string,
+    cur2: string
 ) => boolean | void;
 export type SceneChangeData = { cur: string; prev: string };
-const SceneManager = {
+export const SceneManager = {
     sceneChangeBeforeListener: [] as SceneChangeListener[],
     sceneChangeAfterListener: [] as SceneChangeListener[],
     sceneClassMap: {},
@@ -66,7 +66,7 @@ const SceneManager = {
             const before_handle = this.callChangeListener(
                 'before',
                 this._curScene && this._curScene.url,
-                url,
+                url
             );
             if (before_handle) {
                 return reject();
@@ -83,7 +83,7 @@ const SceneManager = {
                         url,
                         (_ctor: SceneCtor) => {
                             _resolve(_ctor);
-                        },
+                        }
                     );
                 });
                 scene = await this.runSceneByCtor(url, ctor);

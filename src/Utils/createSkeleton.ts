@@ -7,7 +7,7 @@
  *
  * @return 骨骼动画
  */
-function createSkeleton(path, rate?, type?) {
+export function createSkeleton(path, rate?, type?) {
     rate = rate || 30;
     type = type || 0;
     const png = Laya.loader.getRes(path + '.png');
@@ -21,5 +21,3 @@ function createSkeleton(path, rate?, type?) {
 
     return templet.buildArmature(type);
 }
-
-export default createSkeleton;

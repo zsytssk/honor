@@ -1,4 +1,4 @@
-import LoaderManager from './Manager/Loader';
+import { LoaderManager } from './Manager/Loader';
 
 const VIEW_MAP = [
     'SceneManager',
@@ -8,7 +8,7 @@ const VIEW_MAP = [
 ];
 
 export interface HonorLoadScene {
-    /** 关闭调用 */
+    /** 关闭前调用 */
     onReset(): void;
     /** 打开调用 */
     onShow(): void;
@@ -25,7 +25,7 @@ const LOAD_VIEW_MAP = {
 };
 const POOL = {};
 
-const DirectorView = {
+export const DirectorView = {
     init() {
         for (const name of VIEW_MAP) {
             const view = new Laya.Sprite();
@@ -174,5 +174,3 @@ const DirectorView = {
         this[`_$${type}Manager`].addChildAt(view, index);
     },
 };
-
-export default DirectorView;

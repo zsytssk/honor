@@ -21,6 +21,7 @@ let common_config = {
                 test: /\.(.*)?$/,
                 loader: 'ts-loader',
                 options: {
+                    configFile: path.resolve('tsconfig.webpack.json'),
                     compilerOptions: {
                         target: 'es5',
                     },

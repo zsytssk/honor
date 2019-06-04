@@ -1,10 +1,9 @@
-import SceneManager from './Manager/Scene';
-import LoaderManager, { SceneCtor } from './Manager/Loader';
-import DirectorView from './View';
-import { HonorDialogConfig } from './Base/Dialog';
 import { DialogManager } from '../state';
+import { HonorDialogConfig } from './Base/Dialog';
+import { SceneManager } from './Manager/Scene';
+import { DirectorView, HonorScene } from './View';
 
-const Director = {
+export const Director = {
     init() {
         Laya.stage.on(Laya.Event.RESIZE, this, this.onResize);
         this.onResize();
@@ -16,17 +15,30 @@ const Director = {
         SceneManager.onResize(width, height);
         DialogManager.onResize(width, height);
     },
-
-    runScene(url, ...params): Promise<Laya.Scene | void> {
+    /**
+     * 运行场景
+     * @param url 场景的url
+     * @param params 场景 onMounted 接收的参数
+     */
+    runScene(url: string, ...params: any[]): Promise<Laya.Scene | void> {
         return SceneManager.runScene(url, ...params).catch(err => {
             console.error('runScene interrupt');
         });
     },
-
-    get runningScene() {
+    /**
+     * 获取当前正在运行场景
+     * @param url 场景的url
+     * @param params 场景 onMounted 接收的参数
+     */
+    get runningScene(): HonorScene {
         return SceneManager._curScene;
     },
-
+    /**
+     * 打开弹出层
+     * @param url 弹出层
+     * @param params 场景 onMounted 接收的参数
+     * @param config 弹出层的配置
+     */
     openDialog(
         url,
         params?: any[],
@@ -55,14 +67,15 @@ const Director = {
     closeAllDialogs() {
         DialogManager.closeAll();
     },
-
-    setLoadPageForScene(url, callback) {
+    /** 设置场景切换的loading页面
+     * @param url loading页面的url
+     * @param callback 完成的callback
+     */
+    setLoadPageForScene(url: string, callback: Laya.Handler) {
         DirectorView.setLoadView('Scene', url, callback);
     },
 
-    setLoadPageForDialog(url, callback) {
+    setLoadPageForDialog(url: string, callback: Laya.Handler) {
         DirectorView.setLoadView('Dialog', url, callback);
     },
 };
-
-export default Director;

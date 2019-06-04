@@ -2,19 +2,17 @@
     "compilerOptions": {
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "moduleResolution": "node",
-        "downlevelIteration": true,
         "experimentalDecorators": true,
-        "emitDeclarationOnly": true,
         "module": "commonjs",
+        "moduleResolution": "node",
         "rootDir": ".",
         "outDir": "dist",
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "sourceMap": false,
+        "target": "esnext",
         "declaration": true,
-        "target": "es5",
         "watch": true
     },
-    "include": ["./src", "./libs", "./script"]
+    "include": ["./scr", "./script", "./libs"]
 }

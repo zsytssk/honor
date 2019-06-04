@@ -9,7 +9,8 @@
     "scripts": {
         "webpack-dev": "webpack --mode development",
         "webpack-prod": "webpack --mode production",
-        "release": "ts-node  --files ./script/copy"
+        "release": "ts-node  --files ./script/main release",
+        "generateType": "ts-node  --files ./script/main generateType"
     },
     "keywords": [
         "2d",
@@ -22,12 +23,19 @@
     ],
     "devDependencies": {
         "@types/node": "^12.0.4",
-        "ts-node": "^8.2.0",
-        "typescript": "^3.5.1",
+        "dts-bundle-generator": "^3.0.0",
         "ts-loader": "^6.0.2",
+        "ts-node": "^8.2.0",
+        "typedoc-webpack-plugin": "^1.1.4",
+        "typescript": "^3.5.1",
         "webpack": "^4.32.2",
         "webpack-cli": "^3.3.2",
         "webpack-dev-server": "^3.5.1",
         "webpack-node-externals": "^1.7.2"
+    },
+    "dependencies": {
+        "dts-bundle": "^0.7.3",
+        "dts-generator": "^3.0.0",
+        "typedoc": "^0.14.2"
     }
 }

@@ -1,4 +1,4 @@
-import SceneManager, { SceneChangeListener } from '../UI/Manager/Scene';
+import { SceneManager, SceneChangeListener } from '../UI/Manager/Scene';
 
 export function onSceneChangeBefore(fn: SceneChangeListener) {
     SceneManager.sceneChangeBeforeListener.push(fn);
@@ -8,10 +8,14 @@ export function onSceneChangeAfter(fn: SceneChangeListener) {
 }
 
 export function clearListener(fn: SceneChangeListener) {
-    SceneManager.sceneChangeBeforeListener = SceneManager.sceneChangeBeforeListener.filter(item => {
-        return item !== fn;
-    });
-    SceneManager.sceneChangeAfterListener = SceneManager.sceneChangeAfterListener.filter(item => {
-        return item !== fn;
-    });
+    SceneManager.sceneChangeBeforeListener = SceneManager.sceneChangeBeforeListener.filter(
+        item => {
+            return item !== fn;
+        }
+    );
+    SceneManager.sceneChangeAfterListener = SceneManager.sceneChangeAfterListener.filter(
+        item => {
+            return item !== fn;
+        }
+    );
 }

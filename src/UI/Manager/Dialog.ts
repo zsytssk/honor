@@ -1,6 +1,6 @@
-import DirectorView from '../View';
+import { DirectorView } from '../View';
 import { HonorDialogConfig, HonorDialog, DEFAULT_CONFIG } from '../Base/Dialog';
-import LoaderManager from './Loader';
+import {LoaderManager} from './Loader';
 import { Ctor } from '../../type';
 
 const Tween = Laya.Tween;
