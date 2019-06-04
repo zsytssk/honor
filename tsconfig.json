@@ -1,18 +1,21 @@
 {
     "compilerOptions": {
-        "allowJs": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "module": "commonjs",
         "moduleResolution": "node",
+        "downlevelIteration": true,
+        "outFile": "dist/honor.js",
+        "experimentalDecorators": true,
+        "emitDeclarationOnly": true,
+        "module": "commonjs",
         "rootDir": ".",
-        "outDir": "libs",
+        "outDir": "dist",
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "sourceMap": false,
-        "target": "esnext",
+        "declaration": true,
+        "target": "ES5",
         "watch": true
     },
-    "include": ["./scr", "./script"]
+    "include": ["./src", "./libs", "./script"]
 }

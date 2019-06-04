@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { cp } from './ls/main';
 
-const files = ['dist/honor.js'];
+const files = ['dist/honor.js', 'dist/honor.d.ts'];
 const target_folder = 'D:\\zsytssk\\job\\HonorLite\\demo\\libs';
 
 for (const file of files) {
