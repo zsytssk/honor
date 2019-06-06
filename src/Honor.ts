@@ -2,6 +2,10 @@ import { initState } from './state';
 import { Director as director } from './UI/Director';
 import { utils } from './Utils/index';
 
+export { HonorScene } from './UI/Base/Scene';
+export { HonorLoadScene } from './UI/view';
+export { HonorDialog, HonorDialogConfig } from './UI/Base/Dialog';
+
 const name = 'Honor';
 const version = '0.0.1-beta';
 let DEBUG_MODE = false;
