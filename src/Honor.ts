@@ -3,7 +3,7 @@ import { Director as director } from './UI/Director';
 import { utils } from './Utils/index';
 
 export { HonorScene } from './UI/Base/Scene';
-export { HonorLoadScene } from './UI/view';
+export { HonorLoadScene } from './UI/View';
 export { HonorDialog, HonorDialogConfig } from './UI/Base/Dialog';
 
 const name = 'Honor';
