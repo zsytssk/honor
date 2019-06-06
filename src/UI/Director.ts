@@ -1,7 +1,9 @@
 import { DialogManager } from '../state';
 import { HonorDialogConfig } from './Base/Dialog';
 import { SceneManager } from './Manager/Scene';
-import { DirectorView, HonorScene } from './View';
+import { DirectorView, HonorScene, ViewType } from './View';
+import { LoaderManager } from './Manager/Loader';
+import { ResItem } from 'honor/utils/loadRes';
 
 export const Director = {
     init() {
@@ -43,9 +45,12 @@ export const Director = {
         url,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false
+        use_exist = false,
     ) {
         return DialogManager.openDialog(url, params, config, use_exist);
+    },
+    load(res: ResItem[] | string[], type?: ViewType) {
+        return LoaderManager.load(res, type);
     },
 
     getDialogByName(name) {

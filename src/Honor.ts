@@ -1,14 +1,9 @@
 import { initState } from './state';
-import { Director } from './UI/Director';
-import { LoaderManager } from './UI/Manager/Loader';
-import * as sceneChangeMonitor from './Utils/sceneChangeMonitor';
-import { Utils } from './utils/index';
+import { Director as director } from './UI/Director';
+import { utils } from './Utils/index';
 
 const name = 'Honor';
 const version = '0.0.1-beta';
-const load = (...params: [any, any?]) => {
-    return LoaderManager.load(...params);
-};
 let DEBUG_MODE = false;
 
 declare global {
@@ -75,20 +70,9 @@ export const Honor = {
     name,
     version,
     run,
-    director: Director,
-    load,
-    Utils,
-    sceneChangeMonitor,
+    director,
+    utils,
     DEBUG_MODE,
 };
 
-export {
-    name,
-    version,
-    run,
-    Director as director,
-    load,
-    Utils,
-    sceneChangeMonitor,
-    DEBUG_MODE,
-};
+export { name, version, run, director, utils, DEBUG_MODE };

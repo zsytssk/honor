@@ -31,10 +31,10 @@ var isPlainObject = (function () {
  * 调用方式
  * Sail.Utils.extend( [deep ], target, object1 [, objectN ] )
  * Sail.Utils.extend( target [, object1 ] [, objectN ] )
- * 
+ *
  * @return 合并后的对象
  */
-function extend () {
+export function extend () {
     var options, name, src, copy, copyIsArray, clone,
         target = arguments[0] || {},
         i = 1,
@@ -69,5 +69,3 @@ function extend () {
 
     return target;
 };
-
-export default extend;
