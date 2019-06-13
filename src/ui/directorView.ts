@@ -1,4 +1,4 @@
-import { LoaderManager } from './Manager/Loader';
+import { loaderManager } from '../state';
 
 const VIEW_MAP = [
     'SceneManager',
@@ -16,6 +16,7 @@ export interface HonorLoadScene {
     onProgress(val: number): void;
 }
 export interface HonorScene extends Laya.Scene {
+    onResize(width: number, height: number): void;
     onMounted(...param: any[]): void;
 }
 export type ViewType = 'Scene' | 'Dialog' | 'Alert';
@@ -25,8 +26,8 @@ const LOAD_VIEW_MAP = {
 };
 const POOL = {};
 
-export const DirectorView = {
-    init() {
+export class DirectorViewCtor {
+    constructor() {
         for (const name of VIEW_MAP) {
             const view = new Laya.Sprite();
             view.name = `_$${name}`;
@@ -35,9 +36,9 @@ export const DirectorView = {
 
             Laya.stage.addChild(view);
         }
-    },
+    }
 
-    onResize(width, height) {
+    public onResize(width, height) {
         for (const name of VIEW_MAP) {
             this[`_$${name}`].size(width, height);
         }
@@ -54,22 +55,9 @@ export const DirectorView = {
                 }
             }
         }
-    },
+    }
 
-    _createLoadViewByClass(loadType, callback, view) {
-        const { width, height } = Laya.stage;
-        view.size(width, height);
-        if (view.onReset) {
-            view.onReset();
-        }
-        this.addView('Load', view);
-        LOAD_VIEW_MAP[loadType] = view;
-        if (callback) {
-            callback.run();
-        }
-    },
-
-    _createLoadViewByData(type, url, callback, obj) {
+    private createLoadViewByData(type, url, callback, obj) {
         if (!obj) {
             throw new Error(`Can not find "Scene":${url}`);
         }
@@ -81,26 +69,39 @@ export const DirectorView = {
         const ctor = Laya.ClassUtils.getClass(runtime);
 
         this.createView(obj, ctor, url).then(view => {
-            this._createLoadViewByClass(type, callback, view);
+            this.createLoadViewByClass(type, callback, view);
         });
-    },
+    }
 
-    recoverView(view) {
+    private createLoadViewByClass(loadType, callback, view) {
+        const { width, height } = Laya.stage;
+        view.size(width, height);
+        if (view.onReset) {
+            view.onReset();
+        }
+        this.addView('Load', view);
+        LOAD_VIEW_MAP[loadType] = view;
+        if (callback) {
+            callback.run();
+        }
+    }
+
+    public recoverView(view) {
         const key = view.url || view.constructor.name;
         if (!POOL[key]) {
             POOL[key] = [];
         }
         POOL[key].push(view);
-    },
+    }
 
-    getViewByPool(url) {
+    public getViewByPool(url) {
         if (POOL[url]) {
             return POOL[url].pop();
         }
         return null;
-    },
+    }
     /** 通过 view 的 ui 数据创建 view  */
-    createView(data, ctor, url: string, params?: any[]) {
+    public createView(data, ctor, url: string, params?: any[]) {
         return new Promise((resolve, reject) => {
             let scene = new ctor();
             if (params && scene.onMounted) {
@@ -127,15 +128,15 @@ export const DirectorView = {
             }
             throw new Error(`Can not find Scene:${url}`);
         });
-    },
+    }
 
-    setLoadView(type: ViewType, url: string, callback) {
-        LoaderManager.loadScene(null, url, obj => {
-            this._createLoadViewByData(type, url, callback, obj);
+    public setLoadView(type: ViewType, url: string, callback) {
+        loaderManager.loadScene(null, url, obj => {
+            this.createLoadViewByData(type, url, callback, obj);
         });
-    },
+    }
 
-    setLoadViewVisible(type: ViewType, visible: boolean) {
+    public setLoadViewVisible(type: ViewType, visible: boolean) {
         const view = LOAD_VIEW_MAP[type];
         if (view && !view.destroyed) {
             view.visible = visible;
@@ -149,28 +150,28 @@ export const DirectorView = {
                 }
             }
         }
-    },
+    }
 
-    setLoadProgress(type, val) {
+    public setLoadProgress(type, val) {
         const view = LOAD_VIEW_MAP[type];
         if (view && view.onProgress) {
             view.onProgress(val);
         }
-    },
+    }
 
-    getView(type) {
+    public getView(type) {
         return this[`_$${type}Manager`];
-    },
+    }
 
-    setViewVisible(type, visible) {
+    public setViewVisible(type, visible) {
         this[`_$${type}Manager`].visible = visible;
-    },
+    }
 
-    addView(type, view) {
+    public addView(type, view) {
         this[`_$${type}Manager`].addChild(view);
-    },
+    }
 
-    addViewAt(type, view, index) {
+    public addViewAt(type, view, index) {
         this[`_$${type}Manager`].addChildAt(view, index);
-    },
-};
+    }
+}

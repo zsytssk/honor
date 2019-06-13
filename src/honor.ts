@@ -1,10 +1,9 @@
-import { initState } from './state';
-import { Director as director } from './UI/Director';
-import { utils } from './Utils/index';
+import { initState, director } from './state';
+import { utils } from './utils/index';
 
-export { HonorScene } from './UI/Base/Scene';
-export { HonorLoadScene } from './UI/View';
-export { HonorDialog, HonorDialogConfig } from './UI/Base/Dialog';
+export { HonorScene } from './ui/base/Scene';
+export { HonorLoadScene } from './ui/directorView';
+export { HonorDialog, HonorDialogConfig } from './ui/base/Dialog';
 
 const name = 'Honor';
 const version = '0.0.1-beta';
@@ -20,7 +19,7 @@ declare global {
  * @param GameConfig 是Laya自动生成的游戏配置 src/GameConfig
  * @param callback 游戏运行完成之后执行函数
  */
-function run(GameConfig, callback) {
+function run(GameConfig, callback: FuncVoid) {
     if (!callback) {
         console.error('需要引擎启动以后的回调函数，用来启动起始页等');
         return;

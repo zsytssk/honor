@@ -6,7 +6,6 @@ import { formatTime } from './formatTime';
 import { formatMoney } from './formatMoney';
 import { getHtmlElementSize } from './getHtmlElementSize';
 import { loadRes } from './loadRes';
-import * as sceneChangeMonitor from './sceneChangeMonitor';
 
 export const utils = {
     createSkeleton,
@@ -16,6 +15,5 @@ export const utils = {
     formatTime,
     formatMoney,
     getHtmlElementSize,
-    sceneChangeMonitor,
     loadRes,
 };

@@ -1,14 +1,16 @@
-import { ViewType, DirectorView } from '../View';
-import { loadRes, ResItem } from '../../Utils/loadRes';
+import { ViewType } from '../directorView';
+import { loadRes, ResItem } from '../../utils/loadRes';
+import { directorView } from '../../state';
 
 export type SceneCtor = typeof Laya.Scene | Laya.Dialog;
 type LoadSceneCompleteFn = (scene: SceneCtor) => void;
-const state = {
-    is_loading: false,
-};
-export const LoaderManager = {
-    __init__() {},
-    loadScene(type: ViewType, url: string, complete_fn: LoadSceneCompleteFn) {
+export class LoaderManagerCtor {
+    private is_loading = false;
+    public loadScene(
+        type: ViewType,
+        url: string,
+        complete_fn: LoadSceneCompleteFn,
+    ) {
         const sceneData = Laya.Loader.getRes(url);
         if (sceneData) {
             return complete_fn(sceneData);
@@ -25,34 +27,34 @@ export const LoaderManager = {
             complete_fn,
         ]);
         loader.load(url);
-    },
-    load(res: ResItem[] | string[], type?: ViewType) {
+    }
+    public load(res: ResItem[] | string[], type?: ViewType) {
         return new Promise(async (resolve, reject) => {
             this.toggleLoading(type, true);
 
             let load_progress_fn;
             if (type) {
                 load_progress_fn = (val: number) => {
-                    DirectorView.setLoadProgress(type, val);
+                    directorView.setLoadProgress(type, val);
                 };
             }
-            state.is_loading = true;
+            this.is_loading = true;
             await loadRes(res, load_progress_fn);
 
             /** 如果显示loading, 最少显示500ms */
             this.toggleLoading(type, false);
-            state.is_loading = false;
+            this.is_loading = false;
             return resolve();
         });
-    },
+    }
 
-    onLoadProgress(type: ViewType, val: number) {
+    public onLoadProgress(type: ViewType, val: number) {
         if (type) {
-            DirectorView.setLoadProgress(type, val);
+            directorView.setLoadProgress(type, val);
         }
-    },
+    }
 
-    onLoadComplete(
+    public onLoadComplete(
         type: ViewType,
         url: string,
         loader: Laya.SceneLoader,
@@ -65,8 +67,8 @@ export const LoaderManager = {
         if (type) {
             this.toggleLoading(type, false);
         }
-    },
-    toggleLoading(type: ViewType, status: boolean) {
+    }
+    public toggleLoading(type: ViewType, status: boolean) {
         if (!type) {
             return;
         }
@@ -76,7 +78,7 @@ export const LoaderManager = {
         }
         clearTimeout(this[`${type}_timeout`]);
         this[`${type}_timeout`] = setTimeout(() => {
-            DirectorView.setLoadViewVisible(type, status);
+            directorView.setLoadViewVisible(type, status);
         }, time);
-    },
-};
+    }
+}
