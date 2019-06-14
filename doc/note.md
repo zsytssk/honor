@@ -1,5 +1,25 @@
+-   @ques DialogManager 能不能最大化使用 原来 DialogManager 的 api
+-   @ques SceneManager 能不能最大化使用 原来 DialogManager 的 api
+
+    -   支持 class...
+    -   Laya.Scene.
+    -   Laya.Scene.setLoadingPage
+
+## save
+
 -   自动化发布流程
+
     -   webpack-prod tsc generateType release
+
+-   [honor] @todo 关闭所有弹出层中出现还在加载资源的弹出层...
+    -   能不能做 好不好做
+    -   reject all openDialog
+    -   会不会出现始终要打开的页面
+    -   ***
+    -   loading promise 可以中断 return reject
+    -   一大堆异步过程 我怎么方便的去打断...
+    -   只接在 wait_open_dialog_map 里面记录 但是我后面的 dialog 依赖 wait_open_dialog_map 又怎么处理
+    -   ...
 
 ## honor
 
