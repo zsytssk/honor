@@ -1,3 +1,11 @@
+## todo
+
+清理 原来 scene 的逻辑...
+
+Laya.dialog.manager
+
+## 2019-06-17 13:42:57
+
 -   @ques DialogManager 能不能最大化使用 原来 DialogManager 的 api
 -   @ques SceneManager 能不能最大化使用 原来 DialogManager 的 api
 
