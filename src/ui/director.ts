@@ -3,7 +3,7 @@ import { HonorDialogConfig } from './base/Dialog';
 import { HonorScene, ViewType } from './directorView';
 import { loaderManager } from '../state';
 import { ResItem } from '../utils/loadRes';
-import { DEBUG_MODE } from '../honor';
+import { DEBUG_MODE } from '../index';
 import { SceneChangeListener } from './manager/SceneManager';
 
 export class DirectorCtor {
@@ -83,8 +83,8 @@ export class DirectorCtor {
         return directorView.setLoadView('Scene', url);
     }
 
-    public setLoadPageForDialog(url: string, callback: Laya.Handler) {
-        directorView.setLoadView('Dialog', url, callback);
+    public setLoadPageForDialog(url: string) {
+        directorView.setLoadView('Dialog', url);
     }
     public async onSceneChangeBefore(fn: SceneChangeListener) {
         await untilInit();
