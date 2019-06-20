@@ -131,7 +131,7 @@ export class DirectorViewCtor {
     }
 
     public setLoadView(type: ViewType, url: string, callback) {
-        loaderManager.loadScene(null, url, obj => {
+        loaderManager.loadScene(null, url).then(obj => {
             this.createLoadViewByData(type, url, callback, obj);
         });
     }

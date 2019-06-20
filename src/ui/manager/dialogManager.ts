@@ -222,7 +222,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
             }
 
             if (typeof url === 'string') {
-                loaderManager.loadScene('Dialog', url, obj => {
+                loaderManager.loadScene('Dialog', url).then(obj => {
                     this.openDialogByData(url, params, config, obj).then(
                         _dialog => {
                             resolve(_dialog);

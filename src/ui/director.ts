@@ -48,7 +48,7 @@ export class DirectorCtor {
         url,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false,
+        use_exist = false
     ) {
         return dialogManager.openDialog(url, params, config, use_exist);
     }
@@ -99,12 +99,12 @@ export class DirectorCtor {
         sceneManager.sceneChangeBeforeListener = sceneManager.sceneChangeBeforeListener.filter(
             item => {
                 return item !== fn;
-            },
+            }
         );
         sceneManager.sceneChangeAfterListener = sceneManager.sceneChangeAfterListener.filter(
             item => {
                 return item !== fn;
-            },
+            }
         );
     }
 }

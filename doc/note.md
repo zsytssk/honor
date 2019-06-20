@@ -1,5 +1,7 @@
 ## todo
 
+-   @ques [honor] onMounted 在 onAwake 之前怎么处理
+
 清理 原来 scene 的逻辑...
 
 Laya.dialog.manager

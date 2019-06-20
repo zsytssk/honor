@@ -1,15 +1,23 @@
 /**
  * @public
  * 将毫秒转换为`{h}小时{m}分钟{s}秒`的格式
- * @param {Number} total 毫秒数
+ * @param total 毫秒数
  *
  * @return 格式化后的字符串
  */
-export function formatTime(total) {
-    var time = '';
-    var h = 0;
-    var m = 0;
-    var s = total % 60;
+export function formatTime(
+    total: number,
+    format: string | string[] = ['小时', '分钟', '秒'],
+): string {
+    let time = '';
+    let h = 0;
+    let m = 0;
+    let s = total % 60;
+    if (typeof format === 'string') {
+        /** xx::xx::xx 最后不需要:: */
+        format = [format, format, ''];
+    }
+
     if (total > 60) {
         m = (total / 60) | 0;
     }
@@ -19,13 +27,13 @@ export function formatTime(total) {
     }
 
     if (s > 0) {
-        time = s + '秒';
+        time = s + format[2];
     }
     if (m > 0) {
-        time = m + '分钟' + time;
+        time = m + format[1] + time;
     }
     if (h > 0) {
-        time = h + '小时' + time;
+        time = h + format[0] + time;
     }
 
     return time;
