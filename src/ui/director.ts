@@ -79,8 +79,8 @@ export class DirectorCtor {
      * @param url loading页面的url
      * @param callback 完成的callback
      */
-    public setLoadPageForScene(url: string, callback: Laya.Handler) {
-        directorView.setLoadView('Scene', url, callback);
+    public setLoadPageForScene(url: string) {
+        return directorView.setLoadView('Scene', url);
     }
 
     public setLoadPageForDialog(url: string, callback: Laya.Handler) {

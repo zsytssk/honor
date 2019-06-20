@@ -2,6 +2,11 @@
 
 -   @ques [honor] onMounted 在 onAwake 之前怎么处理
 
+-   dialog 设置 dialog dialog.popupEffect closeEffect
+-   弹出层 this.popupEffect = null 时 无法再次打开
+-   version.json config bin/res
+    -   在项目中使用版本
+
 清理 原来 scene 的逻辑...
 
 Laya.dialog.manager
