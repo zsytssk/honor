@@ -4,7 +4,7 @@ const webpack = require('webpack');
 
 let common_config = {
     entry: {
-        main: './src/honor.ts',
+        main: './src/index.ts',
     },
     output: {
         filename: 'honor.js',

@@ -1,3 +1,6 @@
+-   dialog 实在什么地方显示的
+    -   directorView.addView('Dialog', dialog);
+
 ## todo
 
 -   @ques [honor] onMounted 在 onAwake 之前怎么处理

@@ -21,7 +21,9 @@ const defaultPopupEffect = function(dialog) {
         },
         300,
         Laya.Ease.backOut,
-        Laya.Handler.create(this, this.doOpen, [dialog]),
+        Laya.Handler.create(this, () => {
+            this.doOpen(dialog);
+        }),
         0,
         false,
         false
@@ -41,7 +43,11 @@ const defaultCloseEffect = function(dialog) {
         },
         300,
         Laya.Ease.backIn,
-        Laya.Handler.create(this, this.doClose, [dialog]),
+        Laya.Handler.create(this, () => {
+            this.doClose(dialog);
+            dialog.scaleX = 1;
+            dialog.scaleY = 1;
+        }),
         0,
         false,
         false
