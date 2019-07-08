@@ -17,7 +17,7 @@ export type HonorDialogConfig = {
 
 export const DEFAULT_CONFIG = {
     closeOther: false,
-    closeOnSide: false,
+    closeOnSide: true,
     closeByGroup: false,
     closeByName: false,
     shadowAlpha: 0.5,

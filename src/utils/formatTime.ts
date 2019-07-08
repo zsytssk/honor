@@ -1,13 +1,13 @@
 /**
  * @public
  * 将毫秒转换为`{h}小时{m}分钟{s}秒`的格式
- * @param total 毫秒数
+ * @param total 秒数
  *
  * @return 格式化后的字符串
  */
 export function formatTime(
     total: number,
-    format: string | string[] = ['小时', '分钟', '秒'],
+    format: string | string[] = ['小时', '分钟', '秒']
 ): string {
     let time = '';
     let h = 0;
@@ -35,6 +35,13 @@ export function formatTime(
     if (h > 0) {
         time = h + format[0] + time;
     }
-
+    const time_arr = [h, m, s];
+    for (const [index, item] of time_arr) {
+        time += formatTimeZone(item) + format[index];
+    }
     return time;
+}
+
+function formatTimeZone(val: number): string {
+    return val > 9 ? val + '' : '0' + val;
 }

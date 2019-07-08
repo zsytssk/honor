@@ -88,7 +88,15 @@ export class SceneManagerCtor {
             if (scene) {
                 change_data = this.switchScene(params, scene);
             } else if (typeof url === 'string') {
-                const ctor = await loaderManager.loadScene('Scene', url);
+                const ctor = await new Promise((_resolve, _reject) => {
+                    loaderManager.loadScene(
+                        'Scene',
+                        url,
+                        (_ctor: SceneCtor) => {
+                            _resolve(_ctor);
+                        },
+                    );
+                });
                 scene = await this.runSceneByCtor(url, ctor);
                 change_data = this.switchScene(params, scene);
             } else if (typeof url === 'function') {

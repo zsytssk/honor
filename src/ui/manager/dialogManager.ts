@@ -21,12 +21,10 @@ const defaultPopupEffect = function(dialog) {
         },
         300,
         Laya.Ease.backOut,
-        Laya.Handler.create(this, () => {
-            this.doOpen(dialog);
-        }),
+        Laya.Handler.create(this, this.doOpen, [dialog]),
         0,
         false,
-        false
+        false,
     );
 };
 /** 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，
@@ -43,14 +41,10 @@ const defaultCloseEffect = function(dialog) {
         },
         300,
         Laya.Ease.backIn,
-        Laya.Handler.create(this, () => {
-            this.doClose(dialog);
-            dialog.scaleX = 1;
-            dialog.scaleY = 1;
-        }),
+        Laya.Handler.create(this, this.doClose, [dialog]),
         0,
         false,
-        false
+        false,
     );
 };
 
@@ -107,7 +101,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
     private closeOnSide() {
         const content = this.viewContent;
         const dialog = content.getChildAt(
-            content.numChildren - 1
+            content.numChildren - 1,
         ) as HonorDialog;
         const config = this.getDialogConfig(dialog);
         if (
@@ -142,10 +136,10 @@ export class DialogManagerCtor extends Laya.DialogManager {
     /** Dialog 居中 */
     private centerDialog(dialog: Laya.Dialog) {
         dialog.x = Math.round(
-            ((Laya.stage.width - dialog.width) >> 1) + dialog.pivotX
+            ((Laya.stage.width - dialog.width) >> 1) + dialog.pivotX,
         );
         dialog.y = Math.round(
-            ((Laya.stage.height - dialog.height) >> 1) + dialog.pivotY
+            ((Laya.stage.height - dialog.height) >> 1) + dialog.pivotY,
         );
     }
 
@@ -172,7 +166,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
                     0,
                     content.width,
                     content.height,
-                    config.shadowColor
+                    config.shadowColor,
                 );
                 this.maskLayer.alpha = config.shadowAlpha;
 
@@ -190,7 +184,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
         url: DialogRefKey,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false
+        use_exist = false,
     ) {
         if (use_exist) {
             /** 正在打开的dialog */
@@ -210,16 +204,14 @@ export class DialogManagerCtor extends Laya.DialogManager {
                 }
             }
             if (dialog) {
-                if (params) {
-                    dialog.onMounted.apply(dialog, params);
-                }
+                dialog.onMounted(...params);
                 return dialog;
             }
         }
 
         const wait_open = new Promise((resolve, reject) => {
             let dialog = directorView.getViewByPool(
-                typeof url === 'function' ? url.name : url
+                typeof url === 'function' ? url.name : url,
             );
             if (dialog) {
                 if (params) {
@@ -230,11 +222,11 @@ export class DialogManagerCtor extends Laya.DialogManager {
             }
 
             if (typeof url === 'string') {
-                loaderManager.loadScene('Dialog', url).then(obj => {
+                loaderManager.loadScene('Dialog', url, obj => {
                     this.openDialogByData(url, params, config, obj).then(
                         _dialog => {
                             resolve(_dialog);
-                        }
+                        },
                     );
                 });
                 return;
@@ -256,7 +248,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
             wait_open.then(dialog => {
                 this.wait_open_dialog_map.delete(url);
                 return dialog;
-            })
+            }),
         );
         return await wait_open;
     }
@@ -265,7 +257,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
         url: string,
         params: any[],
         config: HonorDialogConfig,
-        obj
+        obj,
     ): Promise<HonorDialog> {
         return new Promise((resolve, reject) => {
             if (!obj) {
@@ -290,7 +282,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
     private openDialogByClass(
         url: DialogRefKey,
         cfg: HonorDialogConfig,
-        dialog: HonorDialog
+        dialog: HonorDialog,
     ) {
         Laya.timer.callLater(this, () => {
             directorView.setViewVisible('Dialog', true);

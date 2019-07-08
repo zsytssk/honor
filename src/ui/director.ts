@@ -3,7 +3,7 @@ import { HonorDialogConfig } from './base/Dialog';
 import { HonorScene, ViewType } from './directorView';
 import { loaderManager } from '../state';
 import { ResItem } from '../utils/loadRes';
-import { DEBUG_MODE } from '../index';
+import { DEBUG_MODE } from '../honor';
 import { SceneChangeListener } from './manager/SceneManager';
 
 export class DirectorCtor {
@@ -48,7 +48,7 @@ export class DirectorCtor {
         url,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false
+        use_exist = false,
     ) {
         return dialogManager.openDialog(url, params, config, use_exist);
     }
@@ -79,12 +79,12 @@ export class DirectorCtor {
      * @param url loading页面的url
      * @param callback 完成的callback
      */
-    public setLoadPageForScene(url: string) {
-        return directorView.setLoadView('Scene', url);
+    public setLoadPageForScene(url: string, callback: Laya.Handler) {
+        directorView.setLoadView('Scene', url, callback);
     }
 
-    public setLoadPageForDialog(url: string) {
-        directorView.setLoadView('Dialog', url);
+    public setLoadPageForDialog(url: string, callback: Laya.Handler) {
+        directorView.setLoadView('Dialog', url, callback);
     }
     public async onSceneChangeBefore(fn: SceneChangeListener) {
         await untilInit();
@@ -99,12 +99,12 @@ export class DirectorCtor {
         sceneManager.sceneChangeBeforeListener = sceneManager.sceneChangeBeforeListener.filter(
             item => {
                 return item !== fn;
-            }
+            },
         );
         sceneManager.sceneChangeAfterListener = sceneManager.sceneChangeAfterListener.filter(
             item => {
                 return item !== fn;
-            }
+            },
         );
     }
 }

@@ -32,6 +32,8 @@ export class DirectorViewCtor {
             const view = new Laya.Sprite();
             view.name = `_$${name}`;
             this[view.name] = view;
+            console.log(name);
+
             Laya.stage.addChild(view);
         }
     }
@@ -55,26 +57,23 @@ export class DirectorViewCtor {
         }
     }
 
-    private createLoadViewByData(type, url, obj) {
-        return new Promise((resolve, reject) => {
-            if (!obj) {
-                return reject(`Can not find "Scene":${url}`);
-            }
-            if (!obj.props) {
-                return reject(`"Scene" data is error:${url}`);
-            }
+    private createLoadViewByData(type, url, callback, obj) {
+        if (!obj) {
+            throw new Error(`Can not find "Scene":${url}`);
+        }
+        if (!obj.props) {
+            throw new Error(`"Scene" data is error:${url}`);
+        }
 
-            const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
-            const ctor = Laya.ClassUtils.getClass(runtime);
+        const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
+        const ctor = Laya.ClassUtils.getClass(runtime);
 
-            this.createView(obj, ctor, url).then(view => {
-                this.createLoadViewByClass(type, view);
-                resolve();
-            });
+        this.createView(obj, ctor, url).then(view => {
+            this.createLoadViewByClass(type, callback, view);
         });
     }
 
-    private createLoadViewByClass(loadType, view) {
+    private createLoadViewByClass(loadType, callback, view) {
         const { width, height } = Laya.stage;
         view.size(width, height);
         if (view.onReset) {
@@ -82,6 +81,9 @@ export class DirectorViewCtor {
         }
         this.addView('Load', view);
         LOAD_VIEW_MAP[loadType] = view;
+        if (callback) {
+            callback.run();
+        }
     }
 
     public recoverView(view) {
@@ -128,9 +130,9 @@ export class DirectorViewCtor {
         });
     }
 
-    public setLoadView(type: ViewType, url: string) {
-        return loaderManager.loadScene(null, url).then(obj => {
-            this.createLoadViewByData(type, url, obj);
+    public setLoadView(type: ViewType, url: string, callback) {
+        loaderManager.loadScene(null, url, obj => {
+            this.createLoadViewByData(type, url, callback, obj);
         });
     }
 
