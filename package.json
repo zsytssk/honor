@@ -10,7 +10,8 @@
         "webpack-dev": "webpack --mode development",
         "webpack-prod": "webpack --mode production",
         "release": "ts-node  --files ./script/main release",
-        "generateType": "ts-node  --files ./script/main generateType"
+        "generateType": "ts-node  --files ./script/main generateType",
+        "synBack": "ts-node  --files ./script/main synBack"
     },
     "keywords": [
         "2d",

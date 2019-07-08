@@ -23,7 +23,6 @@ export const DEFAULT_CONFIG = {
     shadowAlpha: 0.5,
     shadowColor: '#000000',
     autoClose: false,
-    useExit: true,
 } as HonorDialogConfig;
 
 /** Honor 中 dialog支持的接口 */

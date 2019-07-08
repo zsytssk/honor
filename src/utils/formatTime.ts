@@ -7,7 +7,7 @@
  */
 export function formatTime(
     total: number,
-    format: string | string[] = ['小时', '分钟', '秒']
+    format: string | string[] = ['小时', '分钟', '秒'],
 ): string {
     let time = '';
     let h = 0;
@@ -26,17 +26,8 @@ export function formatTime(
         m = m % 60;
     }
 
-    if (s > 0) {
-        time = s + format[2];
-    }
-    if (m > 0) {
-        time = m + format[1] + time;
-    }
-    if (h > 0) {
-        time = h + format[0] + time;
-    }
     const time_arr = [h, m, s];
-    for (const [index, item] of time_arr) {
+    for (const [index, item] of time_arr.entries()) {
         time += formatTimeZone(item) + format[index];
     }
     return time;

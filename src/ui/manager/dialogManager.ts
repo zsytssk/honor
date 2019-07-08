@@ -108,6 +108,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
             dialog instanceof laya.ui.Dialog &&
             dialog.name !== this.maskLayerName &&
             dialog.isModal &&
+            config &&
             config.closeOnSide
         ) {
             dialog.close();
@@ -159,7 +160,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
         for (let i = content.numChildren - 1; i >= 0; i--) {
             const dialog = content.getChildAt(i) as HonorDialog;
             const config = this.getDialogConfig(dialog);
-            if (dialog && dialog.isModal) {
+            if (config && dialog && dialog.isModal) {
                 this.maskLayer.graphics.clear(true);
                 this.maskLayer.graphics.drawRect(
                     0,
@@ -236,10 +237,15 @@ export class DialogManagerCtor extends Laya.DialogManager {
                 if (params) {
                     dialog.onMounted.apply(dialog, params);
                 }
-                dialog.once('onViewCreated', this, () => {
+                if (!dialog._getBit(/*laya.Const.NOT_READY*/ 0x08)) {
                     this.openDialogByClass(url, config, dialog);
-                    return resolve(dialog);
-                });
+                    resolve(dialog);
+                } else {
+                    dialog.once('onViewCreated', this, () => {
+                        this.openDialogByClass(url, config, dialog);
+                        return resolve(dialog);
+                    });
+                }
             }
         }) as Promise<HonorDialog>;
 
@@ -295,6 +301,9 @@ export class DialogManagerCtor extends Laya.DialogManager {
             ...dialog.config,
             ...cfg,
         };
+        if (config.closeOther) {
+            this.closeAll();
+        }
 
         this.dialog_list.push({
             dialog,
@@ -306,9 +315,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
         if (dialog.isPopupCenter) {
             this.centerDialog(dialog);
         }
-        if (config.closeOther) {
-            this.closeAll();
-        }
+
         if (dialog.group && config.closeByGroup) {
             this.closeDialogsByGroup(dialog.group);
         }
@@ -342,7 +349,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
      */
     public doOpen(dialog) {
         const config = this.getDialogConfig(dialog);
-        if (config.autoClose) {
+        if (config && config.autoClose) {
             Laya.timer.once(config.autoClose as number, dialog, dialog.close);
         }
     }

@@ -1,4 +1,5 @@
 import { loaderManager } from '../state';
+import { resolve } from 'url';
 
 const VIEW_MAP = [
     'SceneManager',
@@ -57,35 +58,6 @@ export class DirectorViewCtor {
         }
     }
 
-    private createLoadViewByData(type, url, callback, obj) {
-        if (!obj) {
-            throw new Error(`Can not find "Scene":${url}`);
-        }
-        if (!obj.props) {
-            throw new Error(`"Scene" data is error:${url}`);
-        }
-
-        const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
-        const ctor = Laya.ClassUtils.getClass(runtime);
-
-        this.createView(obj, ctor, url).then(view => {
-            this.createLoadViewByClass(type, callback, view);
-        });
-    }
-
-    private createLoadViewByClass(loadType, callback, view) {
-        const { width, height } = Laya.stage;
-        view.size(width, height);
-        if (view.onReset) {
-            view.onReset();
-        }
-        this.addView('Load', view);
-        LOAD_VIEW_MAP[loadType] = view;
-        if (callback) {
-            callback.run();
-        }
-    }
-
     public recoverView(view) {
         const key = view.url || view.constructor.name;
         if (!POOL[key]) {
@@ -126,14 +98,50 @@ export class DirectorViewCtor {
                 }
                 return;
             }
-            throw new Error(`Can not find Scene:${url}`);
+            if (!scene) {
+                throw new Error(`Can not find Scene:${url}`);
+            } else {
+                throw new Error(
+                    `Scene:${url} is not instance of Laya.Scene | Laya.Dialog, maybe is set wrong runtime`,
+                );
+            }
         });
     }
 
-    public setLoadView(type: ViewType, url: string, callback) {
-        loaderManager.loadScene(null, url, obj => {
-            this.createLoadViewByData(type, url, callback, obj);
+    public setLoadView(type: ViewType, url: string) {
+        return new Promise((resolve, reject) => {
+            loaderManager.loadScene(null, url, obj => {
+                this.createLoadViewByData(type, url, obj).then(() => {
+                    resolve();
+                });
+            });
         });
+    }
+
+    private createLoadViewByData(type, url, obj) {
+        if (!obj) {
+            throw new Error(`Can not find "Scene":${url}`);
+        }
+        if (!obj.props) {
+            throw new Error(`"Scene" data is error:${url}`);
+        }
+
+        const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
+        const ctor = Laya.ClassUtils.getClass(runtime);
+
+        return this.createView(obj, ctor, url).then(view => {
+            this.createLoadViewByClass(type, view);
+        });
+    }
+
+    private createLoadViewByClass(loadType, view) {
+        const { width, height } = Laya.stage;
+        view.size(width, height);
+        if (view.onReset) {
+            view.onReset();
+        }
+        this.addView('Load', view);
+        LOAD_VIEW_MAP[loadType] = view;
     }
 
     public setLoadViewVisible(type: ViewType, visible: boolean) {

@@ -3,7 +3,7 @@ import { HonorDialogConfig } from './base/Dialog';
 import { HonorScene, ViewType } from './directorView';
 import { loaderManager } from '../state';
 import { ResItem } from '../utils/loadRes';
-import { DEBUG_MODE } from '../honor';
+import { DEBUG_MODE } from '../index';
 import { SceneChangeListener } from './manager/SceneManager';
 
 export class DirectorCtor {
@@ -79,12 +79,12 @@ export class DirectorCtor {
      * @param url loading页面的url
      * @param callback 完成的callback
      */
-    public setLoadPageForScene(url: string, callback: Laya.Handler) {
-        directorView.setLoadView('Scene', url, callback);
+    public setLoadPageForScene(url: string, callback?: Laya.Handler) {
+        return directorView.setLoadView('Scene', url, callback);
     }
 
     public setLoadPageForDialog(url: string, callback: Laya.Handler) {
-        directorView.setLoadView('Dialog', url, callback);
+        return directorView.setLoadView('Dialog', url, callback);
     }
     public async onSceneChangeBefore(fn: SceneChangeListener) {
         await untilInit();

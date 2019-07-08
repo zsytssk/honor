@@ -8,6 +8,7 @@ async function main() {
     const actions = {
         release,
         generateType,
+        syncBack,
     };
     if (actions[type]) {
         await actions[type]();
@@ -51,4 +52,11 @@ export async function generateType2() {
         project: path.resolve(rootDir),
         out: 'honor.d.ts',
     });
+}
+
+const dist = 'W:\\libs\\honor';
+const src = 'D:\\zsytssk\\job\\legend\\honor\\src';
+
+async function syncBack() {
+    await cp(dist, src);
 }
