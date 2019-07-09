@@ -3,12 +3,16 @@ import { cp } from './ls/main';
 import { rm } from './ls/rm';
 
 const type = process.argv.slice(2)[0];
+const dist = 'W:\\libs\\honor';
+const src = 'D:\\zsytssk\\job\\legend\\honor\\src';
+
 async function main() {
     console.time('costTime');
     const actions = {
         release,
         generateType,
         syncBack,
+        syncTo,
     };
     if (actions[type]) {
         await actions[type]();
@@ -54,9 +58,10 @@ export async function generateType2() {
     });
 }
 
-const dist = 'W:\\libs\\honor';
-const src = 'D:\\zsytssk\\job\\legend\\honor\\src';
-
 async function syncBack() {
     await cp(dist, src);
+}
+async function syncTo() {
+    console.log(src, dist);
+    await cp(src, dist);
 }
