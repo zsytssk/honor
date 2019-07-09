@@ -4,7 +4,7 @@ import { loaderManager, directorView } from '../../state';
 
 export type SceneChangeListener = (
     cur1: string,
-    cur2: string,
+    cur2: string
 ) => boolean | void;
 export type SceneChangeData = { cur: string; prev: string };
 export type SceneClassMap = { [key: string]: HonorScene };
@@ -31,10 +31,7 @@ export class SceneManagerCtor {
     public switchScene(params: any[], scene: HonorScene): SceneChangeData {
         const { width, height } = Laya.stage;
         scene.size(width, height);
-        if (scene.onMounted) {
-            scene.onMounted.apply(scene, params);
-        }
-        directorView.addView('Scene', scene);
+
         const old_scene = this.cur_scene;
         const prev = old_scene ? old_scene.url : null;
         if (old_scene) {
@@ -43,7 +40,13 @@ export class SceneManagerCtor {
             }
             old_scene.destroy();
         }
+
         this.cur_scene = scene;
+        if (scene.onMounted) {
+            scene.onMounted.apply(scene, params);
+        }
+        directorView.addView('Scene', scene);
+
         const cur = scene.url;
         return {
             cur,
@@ -75,11 +78,11 @@ export class SceneManagerCtor {
             const before_handle = this.callChangeListener(
                 'before',
                 this.cur_scene && this.cur_scene.url,
-                url,
+                url
             );
             if (before_handle) {
                 return reject(
-                    `has callChangeListener interrupt open:> ${url} `,
+                    `has callChangeListener interrupt open:> ${url} `
                 );
             }
 
@@ -94,7 +97,7 @@ export class SceneManagerCtor {
                         url,
                         (_ctor: SceneCtor) => {
                             _resolve(_ctor);
-                        },
+                        }
                     );
                 });
                 scene = await this.runSceneByCtor(url, ctor);
