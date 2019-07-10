@@ -10,7 +10,6 @@ export async function cpFile(src_path, dist_path) {
         console.error(`${src_path} is ignore!`);
         return;
     }
-
     const dist_dir = path.resolve(path.dirname(dist_path));
     const is_exists = await exists(src_path);
     if (!is_exists) {

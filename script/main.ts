@@ -62,6 +62,5 @@ async function syncBack() {
     await cp(dist, src);
 }
 async function syncTo() {
-    console.log(src, dist);
     await cp(src, dist);
 }
