@@ -3,8 +3,8 @@ import { cp } from './ls/main';
 import { rm } from './ls/rm';
 
 const type = process.argv.slice(2)[0];
-const dist = 'W:\\libs\\honor';
-const src = 'D:\\zsytssk\\job\\legend\\honor\\src';
+const dist = 'Z:\\libs\\honor';
+const src = 'D:\\zsytssk\\github\\honorsrc';
 
 async function main() {
     console.time('costTime');

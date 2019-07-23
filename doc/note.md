@@ -1,3 +1,15 @@
+-   @ques 足球怎么带球...
+
+## 2019-07-23 15:43:22
+
+-   @opt honor 直接用原生的方法 来控制 弹出层+场景
+
+    -   @todo honor 的优化
+    -   新建分支来处理
+    -   正常功能的实现 打开 + 关闭, 切换 + onMounted
+    -   额外功能 - use_exit + 场景关联 弹出层
+    -   单独新建仓库来处理这个事情 HonorTest...
+
 -   @opt [honor] setLoadView :> createLoadViewByData + createLoadViewByClass
 
 -   @opt [honor]
