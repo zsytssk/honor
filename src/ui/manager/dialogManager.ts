@@ -9,7 +9,7 @@ const Sprite = Laya.Sprite;
  * 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，
  * 如果不想有任何效果，可以赋值为null
  */
-const defaultPopupEffect = function(dialog) {
+const defaultPopupEffect = function(dialog: HonorDialog) {
     dialog.scale(1, 1);
     dialog._effectTween = Laya.Tween.from(
         dialog,
@@ -30,7 +30,7 @@ const defaultPopupEffect = function(dialog) {
 /** 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，
  * 如果不想有任何效果，可以赋值为null
  */
-const defaultCloseEffect = function(dialog) {
+const defaultCloseEffect = function(dialog: HonorDialog) {
     dialog._effectTween = Laya.Tween.to(
         dialog,
         {
@@ -395,7 +395,7 @@ export class DialogManagerCtor extends Laya.DialogManager {
         const content = this.viewContent;
         for (let i = content.numChildren - 1; i > -1; i--) {
             const item = content.getChildAt(i) as HonorDialog;
-            /** 背景蒙层直接清除 */
+            /** 背景蒙层会直接清除 */
             if (item.name === this.maskLayerName) {
                 break;
             }
@@ -410,13 +410,12 @@ export class DialogManagerCtor extends Laya.DialogManager {
         if (!name) {
             return;
         }
-        const content = this.viewContent;
 
+        const content = this.viewContent;
         for (let i = content.numChildren - 1; i > -1; i--) {
             const item = content.getChildAt(i) as HonorDialog;
             if (item.name === name) {
                 this.close(item);
-                break;
             }
         }
     }

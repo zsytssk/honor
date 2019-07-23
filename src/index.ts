@@ -60,7 +60,7 @@ async function run(
         Laya.PhysicsDebugDraw.enable();
     }
     if (game_config.stat) {
-        Laya.Stat.show();
+        // Laya.Stat.show();
     }
     Laya.alertGlobalError = false;
 

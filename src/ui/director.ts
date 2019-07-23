@@ -79,12 +79,16 @@ export class DirectorCtor {
      * @param url loading页面的url
      * @param callback 完成的callback
      */
-    public setLoadPageForScene(url: string, callback?: Laya.Handler) {
-        return directorView.setLoadView('Scene', url, callback);
+    public setLoadPageForScene(url: string) {
+        return directorView.setLoadView('Scene', url);
     }
 
-    public setLoadPageForDialog(url: string, callback: Laya.Handler) {
-        return directorView.setLoadView('Dialog', url, callback);
+    public setLoadPageForDialog(url: string) {
+        return directorView.setLoadView('Dialog', url);
+    }
+    public async clearDialog(fn: SceneChangeListener) {
+        await untilInit();
+        sceneManager.sceneChangeAfterListener.push(fn);
     }
     public async onSceneChangeBefore(fn: SceneChangeListener) {
         await untilInit();

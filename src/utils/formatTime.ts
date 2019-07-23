@@ -2,17 +2,19 @@
  * @public
  * 将毫秒转换为`{h}小时{m}分钟{s}秒`的格式
  * @param total 秒数
+ * @param min 是否是精简模式, 会将无用的部分去掉
  *
  * @return 格式化后的字符串
  */
 export function formatTime(
     total: number,
     format: string | string[] = ['小时', '分钟', '秒'],
+    min = false,
 ): string {
     let time = '';
     let h = 0;
     let m = 0;
-    let s = total % 60;
+    const s = total % 60;
     if (typeof format === 'string') {
         /** xx::xx::xx 最后不需要:: */
         format = [format, format, ''];
@@ -28,6 +30,11 @@ export function formatTime(
 
     const time_arr = [h, m, s];
     for (const [index, item] of time_arr.entries()) {
+        if (min && !item) {
+            continue;
+        }
+        min = false;
+
         time += formatTimeZone(item) + format[index];
     }
     return time;

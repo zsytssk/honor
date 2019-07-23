@@ -4,7 +4,7 @@ import { rm } from './ls/rm';
 
 const type = process.argv.slice(2)[0];
 const dist = 'Z:\\libs\\honor';
-const src = 'D:\\zsytssk\\github\\honorsrc';
+const src = 'D:\\zsytssk\\github\\honor\\src';
 
 async function main() {
     console.time('costTime');

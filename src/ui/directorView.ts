@@ -1,5 +1,5 @@
 import { loaderManager } from '../state';
-import { resolve } from 'url';
+import { HonorDialog } from './base/Dialog';
 
 const VIEW_MAP = [
     'SceneManager',
@@ -8,7 +8,7 @@ const VIEW_MAP = [
     'AlertManager',
 ];
 
-export interface HonorLoadScene {
+export interface HonorLoadScene extends HonorScene {
     /** 关闭前调用 */
     onReset(): void;
     /** 打开调用 */
@@ -20,7 +20,9 @@ export interface HonorScene extends Laya.Scene {
     onResize(width: number, height: number): void;
     onMounted(...param: any[]): void;
 }
-export type ViewType = 'Scene' | 'Dialog' | 'Alert';
+export type ViewType = 'Scene' | 'Dialog' | 'Load' | 'Alert';
+export type HonorView = HonorScene | HonorDialog | HonorLoadScene;
+
 const LOAD_VIEW_MAP = {
     Scene: null,
     Dialog: null,
@@ -58,7 +60,7 @@ export class DirectorViewCtor {
         }
     }
 
-    public recoverView(view) {
+    public recoverView(view: HonorView) {
         const key = view.url || view.constructor.name;
         if (!POOL[key]) {
             POOL[key] = [];
@@ -66,14 +68,19 @@ export class DirectorViewCtor {
         POOL[key].push(view);
     }
 
-    public getViewByPool(url) {
+    public getViewByPool(url: string) {
         if (POOL[url]) {
             return POOL[url].pop();
         }
         return null;
     }
     /** 通过 view 的 ui 数据创建 view  */
-    public createView(data, ctor, url: string, params?: any[]) {
+    public createView(
+        data: AnyObj,
+        ctor: Ctor<HonorView>,
+        url: string,
+        params?: any[],
+    ) {
         return new Promise((resolve, reject) => {
             let scene = new ctor();
             if (params && scene.onMounted) {
@@ -81,7 +88,8 @@ export class DirectorViewCtor {
             }
 
             if (data.props.renderType === 'instance') {
-                scene = ctor.instance || (ctor.instance = scene);
+                scene =
+                    (ctor as any).instance || ((ctor as any).instance = scene);
             }
             if (
                 scene &&
@@ -118,7 +126,7 @@ export class DirectorViewCtor {
         });
     }
 
-    private createLoadViewByData(type, url, obj) {
+    private createLoadViewByData(type: ViewType, url: string, obj: AnyObj) {
         if (!obj) {
             throw new Error(`Can not find "Scene":${url}`);
         }
@@ -129,23 +137,19 @@ export class DirectorViewCtor {
         const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
         const ctor = Laya.ClassUtils.getClass(runtime);
 
-        return this.createView(obj, ctor, url).then(view => {
-            this.createLoadViewByClass(type, view);
+        return this.createView(obj, ctor, url).then((view: HonorLoadScene) => {
+            const { width, height } = Laya.stage;
+            view.size(width, height);
+            if (view.onReset) {
+                view.onReset();
+            }
+            this.addView('Load', view);
+            LOAD_VIEW_MAP[type] = view;
         });
     }
 
-    private createLoadViewByClass(loadType, view) {
-        const { width, height } = Laya.stage;
-        view.size(width, height);
-        if (view.onReset) {
-            view.onReset();
-        }
-        this.addView('Load', view);
-        LOAD_VIEW_MAP[loadType] = view;
-    }
-
     public setLoadViewVisible(type: ViewType, visible: boolean) {
-        const view = LOAD_VIEW_MAP[type];
+        const view = LOAD_VIEW_MAP[type] as HonorLoadScene;
         if (view && !view.destroyed) {
             view.visible = visible;
             if (visible) {
@@ -160,26 +164,26 @@ export class DirectorViewCtor {
         }
     }
 
-    public setLoadProgress(type, val) {
-        const view = LOAD_VIEW_MAP[type];
+    public setLoadProgress(type: ViewType, val: number) {
+        const view = LOAD_VIEW_MAP[type] as HonorLoadScene;
         if (view && view.onProgress) {
             view.onProgress(val);
         }
     }
 
-    public getView(type) {
+    public getView(type: ViewType) {
         return this[`_$${type}Manager`];
     }
 
-    public setViewVisible(type, visible) {
+    public setViewVisible(type: ViewType, visible: boolean) {
         this[`_$${type}Manager`].visible = visible;
     }
 
-    public addView(type, view) {
+    public addView(type: ViewType, view: Laya.Sprite) {
         this[`_$${type}Manager`].addChild(view);
     }
 
-    public addViewAt(type, view, index) {
+    public addViewAt(type: ViewType, view: Laya.Sprite, index: number) {
         this[`_$${type}Manager`].addChildAt(view, index);
     }
 }
