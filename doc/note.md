@@ -1,4 +1,44 @@
+-   @ques 能不能场景中打开 dialog'
+
+    -   会在场景中打开, 随着场景一起销毁
+
 -   @ques 足球怎么带球...
+
+-   @ques dialog 添加 closeHandler
+
+-   @todo dialog alpha 有没有必要存在
+
+    -   Laya.UIConfig.popupBgAlpha
+    -   Laya.UIConfig.popupBgColor
+    -   可以通过这个来控制
+    -   @todo test 两个弹出层的设置不一样..， 来控制背景的颜色...
+    -   每次 `_checkMask` 之前都要调用
+    -   我怎么找到对应的 dialog
+
+-   @ques 如何监听 dialog 的 close
+
+    -   两次打开的 dialog 是否是一个 dialog
+
+-   @ques Laya.UIConfig 是私有属性我怎么处理
+
+-   @ques 弹出层
+
+    -   弹出层:> 关闭且 destroy | close(true)
+    -   弹出层和场景相关
+        -   用场景打开弹出层
+    -   这些需求是否合理
+    -   group 到底是做什么的...
+
+-   Honor 原生的没有 closeDialogsByName
+
+{
+closeDialogsByGroup
+closeDialogsByName
+getDialogByName
+closeAllDialogs
+openDialog
+config
+}
 
 ## 2019-07-23 15:43:22
 

@@ -9,10 +9,12 @@
     "scripts": {
         "webpack-dev": "webpack --mode development",
         "webpack-prod": "webpack --mode production",
-        "release": "ts-node  --files ./script/main release",
         "generateType": "ts-node  --files ./script/main generateType",
+        "release": "ts-node  --files ./script/main release",
         "syncBack": "ts-node  --files ./script/main syncBack",
-        "syncTo": "ts-node  --files ./script/main syncTo"
+        "release2": "ts-node  --files ./script/main release2",
+        "syncBack2": "ts-node  --files ./script/main syncBack2",
+        "publish": "ts-node  --files ./script/main publish"
     },
     "keywords": [
         "2d",

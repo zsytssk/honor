@@ -4,15 +4,18 @@ import { rm } from './ls/rm';
 
 const type = process.argv.slice(2)[0];
 const dist = 'Z:\\libs\\honor';
+const dist2 = 'D:\\zsytssk\\github\\HonorLite\\libs\\honor';
 const src = 'D:\\zsytssk\\github\\honor\\src';
 
 async function main() {
     console.time('costTime');
     const actions = {
         release,
-        generateType,
         syncBack,
-        syncTo,
+        release2,
+        syncBack2,
+        generateType,
+        publish,
     };
     if (actions[type]) {
         await actions[type]();
@@ -21,7 +24,7 @@ async function main() {
 }
 main();
 
-export function release() {
+export function publish() {
     const files = ['dist/honor.js', 'dist/honor.d.ts'];
     const target_folder = 'D:\\zsytssk\\job\\HonorLite\\demo\\libs';
 
@@ -58,9 +61,16 @@ export async function generateType2() {
     });
 }
 
-async function syncBack() {
-    await cp(dist, src);
+async function release() {
+    cp(src, dist);
 }
-async function syncTo() {
-    await cp(src, dist);
+async function release2() {
+    cp(src, dist2);
+}
+
+async function syncBack() {
+    cp(dist, src);
+}
+async function syncBack2() {
+    cp(dist2, src);
 }
