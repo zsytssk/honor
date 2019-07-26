@@ -1,11 +1,14 @@
-import { dialogManager, directorView, sceneManager, untilInit } from '../state';
-import { HonorDialogConfig } from './base/Dialog';
-import { HonorScene, ViewType } from './directorView';
-import { loaderManager } from '../state';
-import { ResItem } from '../utils/loadRes';
 import { DEBUG_MODE } from '../index';
-import { SceneChangeListener } from './manager/SceneManager';
+import {
+    dialogManager,
+    loaderManager,
+    sceneManager,
+    untilInit,
+} from '../state';
+import { ResItem } from '../utils/loadRes';
 import { DialogRefUrl } from './manager/DialogManager';
+import { SceneChangeListener, SceneRefUrl } from './manager/SceneManager';
+import { HonorDialogConfig, HonorScene, ViewType } from './view';
 
 export class DirectorCtor {
     public init() {
@@ -15,7 +18,6 @@ export class DirectorCtor {
 
     private onResize() {
         const { width, height } = Laya.stage;
-        directorView.onResize(width, height);
         sceneManager.onResize(width, height);
     }
     /**
@@ -23,7 +25,10 @@ export class DirectorCtor {
      * @param url 场景的url
      * @param params 场景 onMounted 接收的参数
      */
-    public runScene(url: string, ...params: any[]): Promise<Laya.Scene | void> {
+    public runScene(
+        url: SceneRefUrl,
+        ...params: any[]
+    ): Promise<Laya.Scene | void> {
         return sceneManager.runScene(url, ...params).catch(err => {
             if (DEBUG_MODE) {
                 console.error(err);
@@ -57,35 +62,34 @@ export class DirectorCtor {
         return loaderManager.load(res, type);
     }
 
-    public getDialogByName(name) {
+    public getDialogByName(name: string) {
         return dialogManager.getDialogByName(name);
     }
 
-    public getDialogsByGroup(group) {
+    public getDialogsByGroup(group: string) {
         return dialogManager.getDialogsByGroup(group);
     }
 
-    public closeDialogByName(name) {
+    public closeDialogByName(name: string) {
         dialogManager.closeDialogByName(name);
     }
 
-    public closeDialogsByGroup(group) {
+    public closeDialogsByGroup(group: string) {
         dialogManager.closeDialogsByGroup(group);
     }
 
     public closeAllDialogs() {
         dialogManager.closeAllDialogs();
     }
-    /** 设置场景切换的loading页面
-     * @param url loading页面的url
-     * @param callback 完成的callback
+    /** 设置scene loading页面
      */
     public setLoadPageForScene(url: string) {
-        return directorView.setLoadView('Scene', url);
+        return loaderManager.setLoadView('Scene', url);
     }
-
+    /** 设置dialog loading 页面
+     */
     public setLoadPageForDialog(url: string) {
-        return directorView.setLoadView('Dialog', url);
+        return loaderManager.setLoadView('Dialog', url);
     }
     public async clearDialog(fn: SceneChangeListener) {
         await untilInit();

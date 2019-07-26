@@ -1,6 +1,6 @@
-import { Ctor } from '../../type';
-import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from '../base/Dialog';
+import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from '../view';
 import { injectAfter } from 'honor/utils/tool';
+import { loaderManager } from 'honor/state';
 
 export type DialogRefUrl = string | Ctor<HonorDialog>;
 type DialogInfo = {
@@ -74,9 +74,9 @@ export class DialogManagerCtor {
             const wait_open_dialog = this.toOpenDialog(url, config.closeOther);
             wait_dialog_task.set(
                 url,
-                wait_open_dialog.then(dialog => {
+                wait_open_dialog.then(_dialog => {
                     wait_dialog_task.delete(url);
-                    return dialog;
+                    return _dialog;
                 }),
             );
 
@@ -85,11 +85,11 @@ export class DialogManagerCtor {
 
         /** 设置dialog的配置 */
         this.setDialogConfig(url, dialog, config);
-        dialog_manager.open(dialog, config.closeOther, true);
         if (dialog.onMounted) {
             dialog.onMounted(...params);
         }
-        this.setTopDialogConfig(dialog);
+        dialog_manager.open(dialog, config.closeOther, true);
+        this.checkMask();
         return dialog;
     }
     public toOpenDialog(
@@ -99,7 +99,6 @@ export class DialogManagerCtor {
         return new Promise((resolve, reject) => {
             /** 使用dialog_pool_list的弹出层 */
             const { dialog_pool_list } = this;
-            let dialog: DialogInfo;
             for (let i = 0; i < dialog_pool_list.length; i++) {
                 const item = dialog_pool_list[i];
                 if (item.url === url) {
@@ -112,12 +111,9 @@ export class DialogManagerCtor {
 
             /** 创建弹出层 */
             if (typeof url === 'string') {
-                Laya.Dialog.load(
-                    url,
-                    new Laya.Handler(this, dialog => {
-                        resolve(dialog);
-                    }),
-                );
+                loaderManager.loadScene('Dialog', url).then(_dialog => {
+                    resolve(_dialog as HonorDialog);
+                });
             } else {
                 const dialog = new url();
                 if (dialog.active) {
@@ -175,11 +171,10 @@ export class DialogManagerCtor {
                 break;
             }
         }
-        this.setTopDialogConfig(dialog);
-        if (dialog.destroyed) {
-            return;
+        this.checkMask();
+        if (dialog_info && !dialog.destroyed) {
+            dialog_pool_list.push(dialog_info);
         }
-        dialog_pool_list.push(dialog_info);
     }
     /** 在dialog打开之后 */
     private injectDoOpenAfter(dialog: HonorDialog) {
@@ -189,11 +184,11 @@ export class DialogManagerCtor {
         }
     }
     /** 在dialog打开之后, 设置背景 + 点击关闭 */
-    private setTopDialogConfig(dialog: HonorDialog) {
+    private checkMask() {
         const { dialog_manager } = this;
         const { maskLayer } = dialog_manager;
-        for (var i = dialog_manager.numChildren - 1; i > -1; i--) {
-            var dialog = dialog_manager.getChildAt(i) as HonorDialog;
+        for (let i = dialog_manager.numChildren - 1; i > -1; i--) {
+            const dialog = dialog_manager.getChildAt(i) as HonorDialog;
             if (dialog && dialog.isModal) {
                 const dialog_config = this.getDialogConfig(dialog);
                 if (!dialog_config) {

@@ -32,3 +32,20 @@ export interface HonorDialog extends Laya.Dialog {
     onMounted?(...params: any[]): void;
     onResize?(width?: number, height?: number): void;
 }
+
+export interface HonorScene extends Laya.Scene {
+    onResize?(width: number, height: number): void;
+    onMounted?(...param: any[]): void;
+}
+
+export interface HonorLoadScene extends HonorScene {
+    /** 关闭前调用 */
+    onHide(): void;
+    /** 打开调用 */
+    onShow(): void;
+    /** 设置进度 */
+    onProgress(val: number): void;
+}
+
+export type ViewType = 'Scene' | 'Dialog';
+export type HonorView = HonorScene | HonorDialog | HonorLoadScene;

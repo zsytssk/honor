@@ -1,10 +1,12 @@
 import { initState, director } from './state';
 import { utils } from './utils/index';
 import { loadRes } from './utils/loadRes';
-
-export { HonorScene } from './ui/base/Scene';
-export { HonorLoadScene } from './ui/directorView';
-export { HonorDialog, HonorDialogConfig } from './ui/base/Dialog';
+export {
+    HonorDialog,
+    HonorDialogConfig,
+    HonorScene,
+    HonorLoadScene,
+} from './ui/view';
 
 export type GameConfig = any;
 export type HonorExternConfig = {
@@ -49,7 +51,7 @@ async function run(
     Laya.URL.exportSceneToJson = game_config.exportSceneToJson;
 
     // 打开调试面板（通过IDE设置调试模式，或者url地址增加debug=true参数，均可打开调试面板）
-    if (game_config.debug || Laya.Utils.getQueryString('debug') == 'true') {
+    if (game_config.debug || Laya.Utils.getQueryString('debug') === 'true') {
         DEBUG_MODE = true;
         Laya.enableDebugPanel();
     } else {
@@ -64,7 +66,8 @@ async function run(
     }
     Laya.alertGlobalError = false;
 
-    let { defaultVersion, versionPath } = extern_config;
+    const { versionPath } = extern_config;
+    let { defaultVersion } = extern_config;
     defaultVersion = defaultVersion || '0';
     Laya.URL.customFormat = url => {
         const version_map = Laya.URL.version || {};
@@ -109,4 +112,5 @@ export const Honor = {
     DEBUG_MODE,
 };
 
+export { name, version, run, director, utils, DEBUG_MODE };
 export default { name, version, run, director, utils, DEBUG_MODE };

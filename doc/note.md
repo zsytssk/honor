@@ -1,3 +1,27 @@
+-   @ques 到底还要不要默认的 loading
+
+## 2019-07-26 15:21:33
+
+-   @todo sceneChangeBeforeListener 可以用 Event 类
+
+*   @ques 如何设置默认的 loadingScene
+
+    -   dialog + 场景的 scene
+
+*   @ques Laya.dialog | laya.Scene 的 loadingPage 是否是一样的
+
+*   @ques 场景有没有必要回收...
+
+*   @ques Login resize 会不会自动调用
+
+*   @ques scene Test
+
+*   @ques scene 切换 loading 会在弹出层上面吗...
+
+*   @ques dialogManager onMouted 在 onEabled 之后处理
+
+## 2019-07-26 10:13:41
+
 -   @ques 能不能场景中打开 dialog'
 
     -   会在场景中打开, 随着场景一起销毁

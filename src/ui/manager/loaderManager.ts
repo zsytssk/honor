@@ -1,32 +1,24 @@
-import { ViewType } from '../directorView';
-import { loadRes, ResItem } from '../../utils/loadRes';
-import { directorView } from '../../state';
+import { ViewType, HonorLoadScene } from '../view';
+import { ResItem, loadRes } from 'honor/utils/loadRes';
 
-export type SceneCtor = typeof Laya.Scene | Laya.Dialog;
-type LoadSceneCompleteFn = (scene: SceneCtor) => void;
+type LoadingMap = Map<ViewType, HonorLoadScene>;
+
 export class LoaderManagerCtor {
     private is_loading = false;
-    public loadScene(
-        type: ViewType,
-        url: string,
-        complete_fn: LoadSceneCompleteFn,
-    ) {
-        const sceneData = Laya.Loader.getRes(url);
-        if (sceneData) {
-            return complete_fn(sceneData);
-        }
-        this.toggleLoading(type, true);
-
-        Laya.loader.resetProgress();
-        const loader = new Laya.SceneLoader();
-        loader.on(Laya.Event.PROGRESS, this, this.onLoadProgress, [type]);
-        loader.once(Laya.Event.COMPLETE, this, this.onLoadComplete, [
-            type,
-            url,
-            loader,
-            complete_fn,
-        ]);
-        loader.load(url);
+    private load_map = new Map() as LoadingMap;
+    public loadScene(type: ViewType, url: string) {
+        return new Promise((resolve, reject) => {
+            const ctor = type === 'Scene' ? Laya.Scene : Laya.Dialog;
+            ctor.load(
+                url,
+                Laya.Handler.create(this, _scene => {
+                    resolve(_scene);
+                    this.toggleLoading(type, false);
+                }),
+                Laya.Handler.create(this, this.setLoadProgress, [type], false),
+            );
+            this.toggleLoading(type, true);
+        });
     }
     public load(res: ResItem[] | string[], type?: ViewType) {
         return new Promise(async (resolve, reject) => {
@@ -35,39 +27,17 @@ export class LoaderManagerCtor {
             let load_progress_fn;
             if (type) {
                 load_progress_fn = (val: number) => {
-                    directorView.setLoadProgress(type, val);
+                    this.setLoadProgress(type, val);
                 };
             }
-            this.is_loading = true;
             await loadRes(res, load_progress_fn);
 
             /** 如果显示loading, 最少显示500ms */
             this.toggleLoading(type, false);
-            this.is_loading = false;
             return resolve();
         });
     }
 
-    public onLoadProgress(type: ViewType, val: number) {
-        if (type) {
-            directorView.setLoadProgress(type, val);
-        }
-    }
-
-    public onLoadComplete(
-        type: ViewType,
-        url: string,
-        loader: Laya.SceneLoader,
-        complete_fn: LoadSceneCompleteFn,
-    ) {
-        loader.off(Laya.Event.PROGRESS, null, this.onLoadProgress);
-        const obj = Laya.Loader.getRes(url);
-
-        complete_fn(obj);
-        if (type) {
-            this.toggleLoading(type, false);
-        }
-    }
     public toggleLoading(type: ViewType, status: boolean) {
         if (!type) {
             return;
@@ -78,7 +48,41 @@ export class LoaderManagerCtor {
         }
         clearTimeout(this[`${type}_timeout`]);
         this[`${type}_timeout`] = setTimeout(() => {
-            directorView.setLoadViewVisible(type, status);
+            this.setLoadViewVisible(type, status);
         }, time);
+    }
+    public async setLoadView(type: ViewType, url: string) {
+        const ctor = type === 'Scene' ? Laya.Scene : Laya.Dialog;
+        const scene: HonorLoadScene = await new Promise((resolve, reject) => {
+            ctor.load(
+                url,
+                Laya.Handler.create(null, _scene => {
+                    ctor.setLoadingPage(_scene);
+                    resolve(_scene);
+                }),
+            );
+        });
+
+        this.load_map.set(type, scene);
+    }
+
+    public setLoadViewVisible(type: ViewType, visible: boolean) {
+        const load_scene = this.load_map.get(type);
+        if (!load_scene) {
+            return;
+        }
+        if (visible) {
+            this.setLoadProgress(type, 0);
+            load_scene.onShow();
+        } else {
+            load_scene.onHide();
+        }
+    }
+    public setLoadProgress(type: ViewType, val: number) {
+        const load_scene = this.load_map.get(type);
+        if (!load_scene) {
+            return;
+        }
+        load_scene.onProgress(val);
     }
 }

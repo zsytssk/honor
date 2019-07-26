@@ -1,12 +1,10 @@
 import { DialogManagerCtor } from './ui/manager/DialogManager';
-import { DirectorViewCtor } from './ui/directorView';
 import { SceneManagerCtor } from './ui/manager/SceneManager';
 import { LoaderManagerCtor } from './ui/manager/LoaderManager';
 import { DirectorCtor } from './ui/director';
 
 export let dialogManager: DialogManagerCtor;
 export let loaderManager: LoaderManagerCtor;
-export let directorView: DirectorViewCtor;
 export let sceneManager: SceneManagerCtor;
 export let director = new DirectorCtor();
 
@@ -23,7 +21,6 @@ export function untilInit() {
 }
 /** 一切初始化+全局变量都在这里 */
 export function initState() {
-    directorView = new DirectorViewCtor();
     sceneManager = new SceneManagerCtor();
     loaderManager = new LoaderManagerCtor();
     dialogManager = new DialogManagerCtor();

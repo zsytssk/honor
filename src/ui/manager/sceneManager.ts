@@ -1,18 +1,19 @@
-import { HonorScene } from '../directorView';
-import { SceneCtor } from './loaderManager';
-import { loaderManager, directorView } from '../../state';
-
+import { loaderManager } from 'honor/state';
+import { HonorScene } from '../view';
 export type SceneChangeListener = (
     cur1: string,
-    cur2: string
+    cur2: string,
 ) => boolean | void;
 export type SceneChangeData = { cur: string; prev: string };
 export type SceneClassMap = { [key: string]: HonorScene };
 
+export type SceneRefUrl = string | Ctor<HonorScene>;
+type SceneMap = Map<SceneRefUrl, HonorScene>;
 export class SceneManagerCtor {
     public sceneChangeBeforeListener = [] as SceneChangeListener[];
     public sceneChangeAfterListener = [] as SceneChangeListener[];
     public sceneClassMap: SceneClassMap = {};
+    public scene_pool = new Map() as SceneMap;
     private cur_scene: HonorScene;
 
     public onResize(width, height) {
@@ -29,23 +30,22 @@ export class SceneManagerCtor {
     }
 
     public switchScene(params: any[], scene: HonorScene): SceneChangeData {
+        const { scene_pool } = this;
         const { width, height } = Laya.stage;
         scene.size(width, height);
 
         const old_scene = this.cur_scene;
         const prev = old_scene ? old_scene.url : null;
-        if (old_scene) {
-            if (old_scene.onClosed) {
-                old_scene.onClosed();
-            }
-            old_scene.destroy();
-        }
 
         this.cur_scene = scene;
+        scene.open(true);
         if (scene.onMounted) {
             scene.onMounted.apply(scene, params);
         }
-        directorView.addView('Scene', scene);
+
+        if (old_scene && !old_scene.destroyed) {
+            scene_pool.set(prev, old_scene);
+        }
 
         const cur = scene.url;
         return {
@@ -55,7 +55,7 @@ export class SceneManagerCtor {
     }
     private callChangeListener(
         type: 'after' | 'before',
-        ...params: string[]
+        ...params: any[]
     ): boolean {
         let listener;
         if (type === 'before') {
@@ -72,67 +72,41 @@ export class SceneManagerCtor {
         }
     }
     /** 运行场景 */
-    public runScene(url, ...params): Promise<Laya.Scene> {
+    public runScene(url: SceneRefUrl, ...params): Promise<Laya.Scene> {
         return new Promise(async (resolve, reject) => {
             /** 场景切换前执行, 如果被截取 就不进入场景 */
             const before_handle = this.callChangeListener(
                 'before',
                 this.cur_scene && this.cur_scene.url,
-                url
+                url,
             );
             if (before_handle) {
                 return reject(
-                    `has callChangeListener interrupt open:> ${url} `
+                    `has callChangeListener interrupt open:> ${url} `,
                 );
             }
 
-            let scene = directorView.getViewByPool(url);
+            let scene: HonorScene = this.scene_pool.get(url);
             let change_data: { cur: string; prev: string };
             if (scene) {
                 change_data = this.switchScene(params, scene);
             } else if (typeof url === 'string') {
-                const ctor = await new Promise((_resolve, _reject) => {
-                    loaderManager.loadScene(
-                        'Scene',
-                        url,
-                        (_ctor: SceneCtor) => {
-                            _resolve(_ctor);
-                        }
-                    );
-                });
-                scene = await this.runSceneByCtor(url, ctor);
-                change_data = this.switchScene(params, scene);
+                scene = (await loaderManager.loadScene(
+                    'Scene',
+                    url,
+                )) as HonorScene;
             } else if (typeof url === 'function') {
                 scene = new url();
-                await new Promise((resolve, reject) => {
+                await new Promise((_resolve, _reject) => {
                     scene.once('onViewCreated', this, () => {
-                        return resolve();
+                        return resolve(scene);
                     });
                 });
-                change_data = this.switchScene(params, scene);
             }
 
+            change_data = this.switchScene(params, scene);
             this.callChangeListener('after', change_data.cur, change_data.prev);
             return resolve(scene);
-        });
-    }
-
-    private runSceneByCtor(url, obj) {
-        return new Promise((resolve, reject) => {
-            if (!obj) {
-                throw new Error(`Can not find "Scene":${url}`);
-            }
-            if (!obj.props) {
-                throw new Error(`"Scene" data is error:${url}`);
-            }
-
-            const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
-            const ctor = Laya.ClassUtils.getClass(runtime);
-            this.sceneClassMap[url] = ctor;
-
-            directorView.createView(obj, ctor, url).then(scene => {
-                resolve(scene);
-            });
         });
     }
 }
