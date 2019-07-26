@@ -5,6 +5,7 @@ import { loaderManager } from '../state';
 import { ResItem } from '../utils/loadRes';
 import { DEBUG_MODE } from '../index';
 import { SceneChangeListener } from './manager/SceneManager';
+import { DialogRefUrl } from './manager/DialogManager';
 
 export class DirectorCtor {
     public init() {
@@ -16,7 +17,6 @@ export class DirectorCtor {
         const { width, height } = Laya.stage;
         directorView.onResize(width, height);
         sceneManager.onResize(width, height);
-        dialogManager.onResize(width, height);
     }
     /**
      * 运行场景
@@ -33,6 +33,7 @@ export class DirectorCtor {
     /**
      * 获取当前正在运行场景
      * @param url 场景的url
+     * .3.3..
      * @param params 场景 onMounted 接收的参数
      */
     get runningScene(): HonorScene {
@@ -45,9 +46,9 @@ export class DirectorCtor {
      * @param config 弹出层的配置
      */
     public openDialog(
-        url,
+        url: DialogRefUrl,
         params?: any[],
-        config?: HonorDialogConfig,
+        config: HonorDialogConfig = {},
         use_exist = false,
     ) {
         return dialogManager.openDialog(url, params, config, use_exist);
@@ -73,7 +74,7 @@ export class DirectorCtor {
     }
 
     public closeAllDialogs() {
-        dialogManager.closeAll();
+        dialogManager.closeAllDialogs();
     }
     /** 设置场景切换的loading页面
      * @param url loading页面的url

@@ -27,7 +27,7 @@ declare global {
  */
 async function run(
     game_config: GameConfig,
-    extern_config: HonorExternConfig = {}
+    extern_config: HonorExternConfig = {},
 ) {
     // 根据IDE设置初始化引擎
     if (window.Laya3D) {
@@ -87,25 +87,18 @@ async function run(
             'fileconfig.json',
             Laya.Handler.create(null, async () => {
                 resolve();
-            })
+            }),
         );
     });
     start_task.push(fileconfig_task);
 
-    if (versionPath) start_task.push(loadRes([versionPath]));
+    if (versionPath) {
+        start_task.push(loadRes([versionPath]));
+    }
     await Promise.all(start_task);
     Laya.URL.version = Laya.loader.getRes(versionPath);
 
     initState();
 }
 
-export const Honor = {
-    name,
-    version,
-    run,
-    director,
-    utils,
-    DEBUG_MODE,
-};
-
-export { name, version, run, director, utils, DEBUG_MODE };
+export default { name, version, run, director, utils, DEBUG_MODE };

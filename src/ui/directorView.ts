@@ -17,8 +17,8 @@ export interface HonorLoadScene extends HonorScene {
     onProgress(val: number): void;
 }
 export interface HonorScene extends Laya.Scene {
-    onResize(width: number, height: number): void;
-    onMounted(...param: any[]): void;
+    onResize?(width: number, height: number): void;
+    onMounted?(...param: any[]): void;
 }
 export type ViewType = 'Scene' | 'Dialog' | 'Load' | 'Alert';
 export type HonorView = HonorScene | HonorDialog | HonorLoadScene;

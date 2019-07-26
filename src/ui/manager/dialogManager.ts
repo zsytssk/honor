@@ -1,467 +1,252 @@
-import { HonorDialogConfig, HonorDialog, DEFAULT_CONFIG } from '../base/Dialog';
-import { loaderManager, directorView } from '../../state';
 import { Ctor } from '../../type';
+import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from '../base/Dialog';
+import { injectAfter } from 'honor/utils/tool';
 
-const Tween = Laya.Tween;
-const Sprite = Laya.Sprite;
-
-/**
- * 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，
- * 如果不想有任何效果，可以赋值为null
- */
-const defaultPopupEffect = function(dialog: HonorDialog) {
-    dialog.scale(1, 1);
-    dialog._effectTween = Laya.Tween.from(
-        dialog,
-        {
-            x: Laya.stage.width / 2,
-            y: Laya.stage.height / 2,
-            scaleX: 0,
-            scaleY: 0,
-        },
-        300,
-        Laya.Ease.backOut,
-        Laya.Handler.create(this, this.doOpen, [dialog]),
-        0,
-        false,
-        false
-    );
-};
-/** 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，
- * 如果不想有任何效果，可以赋值为null
- */
-const defaultCloseEffect = function(dialog: HonorDialog) {
-    dialog._effectTween = Laya.Tween.to(
-        dialog,
-        {
-            x: Laya.stage.width / 2,
-            y: Laya.stage.height / 2,
-            scaleX: 0,
-            scaleY: 0,
-        },
-        300,
-        Laya.Ease.backIn,
-        Laya.Handler.create(this, this.doClose, [dialog]),
-        0,
-        false,
-        false
-    );
-};
-
-type DialogRefKey = string | Ctor<HonorDialog>;
+export type DialogRefUrl = string | Ctor<HonorDialog>;
 type DialogInfo = {
-    url: DialogRefKey;
+    url: DialogRefUrl;
     dialog: HonorDialog;
     config: HonorDialogConfig;
 };
-type WaitOpenDialogMap = Map<DialogRefKey, Promise<HonorDialog>>;
+type WaitOpenDialogMap = Map<DialogRefUrl, Promise<HonorDialog>>;
 /**
  * <code>DialogManager</code> 对话框管理容器，所有的对话框都在该容器内，并且受管理器管理。
  * 任意对话框打开和关闭，都会触发管理类的open和close事件
  * 可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭，点击窗口是否切换层次等
  * 通过设置对话框的zOrder属性，可以更改弹出的层次
  */
-
-export class DialogManagerCtor extends Laya.DialogManager {
-    private viewContent: Laya.Sprite = null;
-    private maskLayerName: string;
-    public popupEffectHandler: Laya.Handler;
-    public closeEffectHandler: Laya.Handler;
-    public maskLayer: Laya.Sprite;
-    private wait_open_dialog_map = new Map() as WaitOpenDialogMap;
-    /** dialog的缓存列表 @ques 在什么时候清除 */
-    private dialog_list: DialogInfo[] = [];
+export class DialogManagerCtor {
+    /** 正在打开的 dialog */
+    private wait_dialog_task = new Map() as WaitOpenDialogMap;
+    /** 已经打开的 dialog */
+    private open_dialog_list: DialogInfo[] = [];
+    /** 缓存关闭的 dialog */
+    private dialog_pool_list: DialogInfo[] = [];
+    private dialog_manager: Laya.DialogManager;
     constructor() {
-        super();
-        this.maskLayerName = `__$DialogManagerMaskLayer:${Math.random()}`;
-        this.popupEffectHandler = new Laya.Handler(this, defaultPopupEffect);
-        this.closeEffectHandler = new Laya.Handler(this, defaultCloseEffect);
-
-        this.maskLayer = new Sprite();
-        this.maskLayer.on('click', this, this.closeOnSide);
-        this.maskLayer.name = this.maskLayerName;
-
-        directorView.addView('Dialog', this.maskLayer);
-        directorView.setViewVisible('Dialog', false);
-
-        this.viewContent = directorView.getView('Dialog');
-        this.viewContent.mouseThrough = true;
-
-        Laya.Dialog.manager = this as any;
-    }
-
-    /** 获取dialog的配置  */
-    private getDialogConfig(dialog: HonorDialog) {
-        for (const item of this.dialog_list) {
-            if (item.dialog === dialog) {
-                return item.config;
-            }
-        }
-    }
-    private closeOnSide() {
-        const content = this.viewContent;
-        const dialog = content.getChildAt(
-            content.numChildren - 1
-        ) as HonorDialog;
-        const config = this.getDialogConfig(dialog);
-        if (
-            dialog instanceof laya.ui.Dialog &&
-            dialog.name !== this.maskLayerName &&
-            dialog.isModal &&
-            config &&
-            config.closeOnSide
-        ) {
-            dialog.close();
-        }
-    }
-
-    public onResize(width?: number, height?: number) {
-        const content = this.viewContent;
-        this.maskLayer.size(width, height);
-
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i) as HonorDialog;
-            if (item.name !== this.maskLayerName) {
-                if (item.isPopupCenter) {
-                    this.centerDialog(item);
-                }
-                if (item.onResize) {
-                    item.onResize(width, height);
-                }
-            }
-        }
-
-        this.checkMask();
-    }
-
-    /** Dialog 居中 */
-    private centerDialog(dialog: Laya.Dialog) {
-        dialog.x = Math.round(
-            ((Laya.stage.width - dialog.width) >> 1) + dialog.pivotX
+        UIConfig.closeDialogOnSide = false;
+        const dialog_manager = Laya.Dialog.manager;
+        injectAfter(
+            dialog_manager,
+            'doClose',
+            this.injectDoCloseAfter.bind(this),
         );
-        dialog.y = Math.round(
-            ((Laya.stage.height - dialog.height) >> 1) + dialog.pivotY
+        injectAfter(
+            dialog_manager,
+            'doOpen',
+            this.injectDoOpenAfter.bind(this),
         );
+        this.dialog_manager = dialog_manager;
     }
 
-    private clearDialogEffect(dialog: Laya.Dialog) {
-        Laya.timer.clear(dialog, dialog.close);
-        if (dialog._effectTween) {
-            Tween.clear(dialog._effectTween);
-            dialog._effectTween = null;
-        }
-    }
-
-    /** 发生层次改变后，重新检查遮罩层是否正确 */
-    private checkMask() {
-        const content = this.viewContent;
-        this.maskLayer.removeSelf();
-
-        for (let i = content.numChildren - 1; i >= 0; i--) {
-            const dialog = content.getChildAt(i) as HonorDialog;
-            const config = this.getDialogConfig(dialog);
-            if (config && dialog && dialog.isModal) {
-                this.maskLayer.graphics.clear(true);
-                this.maskLayer.graphics.drawRect(
-                    0,
-                    0,
-                    content.width,
-                    content.height,
-                    config.shadowColor
-                );
-                this.maskLayer.alpha = config.shadowAlpha;
-
-                directorView.addViewAt('Dialog', this.maskLayer, i);
-                return;
-            }
-        }
-
-        if (content.numChildren === 0) {
-            directorView.setViewVisible('Dialog', false);
-        }
-    }
     /** @todo 逻辑需要整理下 getViewByPool 不再使用... */
     public async openDialog(
-        url: DialogRefKey,
+        url: DialogRefUrl,
         params?: any[],
         config?: HonorDialogConfig,
-        use_exist = false
+        use_exist?: boolean,
     ) {
+        const { wait_dialog_task, open_dialog_list, dialog_manager } = this;
+
+        /** 使用正在打开或者已经打开的弹出层... */
+        let dialog: HonorDialog;
         if (use_exist) {
             /** 正在打开的dialog */
-            const wait_open_dialog = this.wait_open_dialog_map.get(url);
-            let dialog: HonorDialog;
+            const wait_open_dialog = wait_dialog_task.get(url);
             if (wait_open_dialog) {
                 dialog = await wait_open_dialog.then(_dialog => {
                     return _dialog;
                 });
             } else {
                 /** 已经打开的dialog */
-                const item = this.dialog_list.find(_item => {
+                const item = open_dialog_list.find(_item => {
                     return _item.url === url;
                 });
                 if (item) {
                     dialog = item.dialog;
                 }
             }
-            if (dialog) {
-                dialog.onMounted(...params);
-                return dialog;
-            }
         }
 
-        const wait_open = new Promise((resolve, reject) => {
-            let dialog = directorView.getViewByPool(
-                typeof url === 'function' ? url.name : url
+        /** 如果没有找到dialog(use_exist=true), 后者use_exist=false */
+        if (!dialog) {
+            /** 已经打开dialog, 从wait_dialog_task移除, 放到open_dialog_list中 */
+            const wait_open_dialog = this.toOpenDialog(url, config.closeOther);
+            wait_dialog_task.set(
+                url,
+                wait_open_dialog.then(dialog => {
+                    wait_dialog_task.delete(url);
+                    return dialog;
+                }),
             );
-            if (dialog) {
-                if (params) {
-                    dialog.onMounted.apply(dialog, params);
-                }
-                this.openDialogByClass(url, config, dialog);
-                return resolve(dialog);
-            }
 
-            if (typeof url === 'string') {
-                loaderManager.loadScene('Dialog', url, obj => {
-                    this.openDialogByData(url, params, config, obj).then(
-                        _dialog => {
-                            resolve(_dialog);
-                        }
-                    );
-                });
+            dialog = await wait_open_dialog;
+        }
+
+        /** 设置dialog的配置 */
+        this.setDialogConfig(url, dialog, config);
+        dialog_manager.open(dialog, config.closeOther, true);
+        dialog.onMounted(...params);
+        this.setTopDialogConfig(dialog);
+        return dialog;
+    }
+    public toOpenDialog(
+        url: DialogRefUrl,
+        close_other = false,
+    ): Promise<HonorDialog> {
+        return new Promise((resolve, reject) => {
+            /** 使用dialog_pool_list的弹出层 */
+            const { dialog_pool_list } = this;
+            let item: DialogInfo;
+            for (let i = 0; i < dialog_pool_list.length; i++) {
+                item = dialog_pool_list[i];
+                if (item.url === url) {
+                    dialog_pool_list.splice(i, 1);
+                    break;
+                }
+            }
+            if (item) {
+                const dialog = item.dialog;
+                resolve(dialog);
                 return;
             }
-            if (typeof url === 'function') {
-                dialog = new url();
-                if (params) {
-                    dialog.onMounted.apply(dialog, params);
-                }
-                if (!dialog._getBit(/*laya.Const.NOT_READY*/ 0x08)) {
-                    this.openDialogByClass(url, config, dialog);
+
+            /** 创建弹出层 */
+            if (typeof url === 'string') {
+                Laya.Dialog.load(
+                    url,
+                    new Laya.Handler(this, dialog => {
+                        resolve(dialog);
+                    }),
+                );
+            } else {
+                const dialog = new url();
+                if (dialog.active) {
                     resolve(dialog);
                 } else {
                     dialog.once('onViewCreated', this, () => {
-                        this.openDialogByClass(url, config, dialog);
                         return resolve(dialog);
                     });
                 }
             }
-        }) as Promise<HonorDialog>;
-
-        this.wait_open_dialog_map.set(
-            url,
-            wait_open.then(dialog => {
-                this.wait_open_dialog_map.delete(url);
-                return dialog;
-            })
-        );
-        return await wait_open;
-    }
-    /** 通过dialog的配置来打开 dialog */
-    private openDialogByData(
-        url: string,
-        params: any[],
-        config: HonorDialogConfig,
-        obj
-    ): Promise<HonorDialog> {
-        return new Promise((resolve, reject) => {
-            if (!obj) {
-                throw new Error(`Can not find "Dialog":${url}`);
-            }
-            if (!obj.props) {
-                throw new Error(`"Dialog" data is error:${url}`);
-            }
-
-            const runtime = obj.props.runtime ? obj.props.runtime : obj.type;
-            const ctor = Laya.ClassUtils.getClass(runtime);
-
-            directorView
-                .createView(obj, ctor, url, params)
-                .then((dialog: HonorDialog) => {
-                    this.openDialogByClass(url, config, dialog);
-                    resolve(dialog);
-                });
         });
     }
-
-    private openDialogByClass(
-        url: DialogRefKey,
-        cfg: HonorDialogConfig,
-        dialog: HonorDialog
+    /** 在dialog关闭之后将没有destroy的dialog放在dialog_pool_list, 下次利用 */
+    private setDialogConfig(
+        url: DialogRefUrl,
+        dialog: HonorDialog,
+        config: HonorDialogConfig = {},
     ) {
-        Laya.timer.callLater(this, () => {
-            directorView.setViewVisible('Dialog', true);
-        });
-
-        this.clearDialogEffect(dialog);
-
-        const config = {
+        const { open_dialog_list } = this;
+        config = {
             ...DEFAULT_CONFIG,
             ...dialog.config,
-            ...cfg,
+            ...config,
         };
-        if (config.closeOther) {
-            this.closeAll();
-        }
-
-        this.dialog_list.push({
-            dialog,
-            config,
-            url,
+        const item = open_dialog_list.find(_item => {
+            return _item.dialog === dialog;
         });
 
-        directorView.addView('Dialog', dialog);
-        if (dialog.isPopupCenter) {
-            this.centerDialog(dialog);
-        }
-
-        if (dialog.group && config.closeByGroup) {
-            this.closeDialogsByGroup(dialog.group);
-        }
-        if (dialog.name && config.closeByName) {
-            this.closeDialogByName(dialog.name);
-        }
-
-        if (
-            dialog.isModal ||
-            this.viewContent._getBit(/*laya.Const.HAS_ZORDER*/ 0x20)
-        ) {
-            Laya.timer.callLater(this, this.checkMask);
-        }
-
-        // 首次打开计算界面组件自适应
-        if (dialog.onResize) {
-            dialog.scale(1, 1);
-            dialog.onResize();
-        }
-
-        if (dialog.isShowEffect && dialog.popupEffect != null) {
-            dialog.popupEffect.runWith(dialog);
+        if (item) {
+            item.config = config;
         } else {
-            this.doOpen(dialog);
+            open_dialog_list.push({
+                url,
+                dialog,
+                config,
+            });
         }
     }
-
-    /**
-     * 执行打开对话框。
-     * @param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-     */
-    public doOpen(dialog) {
+    private getDialogConfig(dialog: HonorDialog): HonorDialogConfig {
+        const { open_dialog_list } = this;
+        const item = open_dialog_list.find(_item => {
+            return _item.dialog === dialog;
+        });
+        return item && item.config;
+    }
+    /** 在dialog关闭之后将没有destroy的dialog放在dialog_pool_list, 下次利用 */
+    private injectDoCloseAfter(dialog: HonorDialog) {
+        const { open_dialog_list, dialog_pool_list } = this;
+        let dialog_info: DialogInfo;
+        for (let i = 0; i < open_dialog_list.length; i++) {
+            const item = open_dialog_list[i];
+            if (item.dialog === dialog) {
+                dialog_info = item;
+                open_dialog_list.splice(i, 1);
+                break;
+            }
+        }
+        this.setTopDialogConfig(dialog);
+        if (dialog.destroyed) {
+            return;
+        }
+        dialog_pool_list.push(dialog_info);
+    }
+    /** 在dialog打开之后 */
+    private injectDoOpenAfter(dialog: HonorDialog) {
         const config = this.getDialogConfig(dialog);
         if (config && config.autoClose) {
             Laya.timer.once(config.autoClose as number, dialog, dialog.close);
         }
     }
+    /** 在dialog打开之后, 设置背景 + 点击关闭 */
+    private setTopDialogConfig(dialog: HonorDialog) {
+        const { dialog_manager } = this;
+        const { maskLayer } = dialog_manager;
+        for (var i = dialog_manager.numChildren - 1; i > -1; i--) {
+            var dialog = dialog_manager.getChildAt(i) as HonorDialog;
+            if (dialog && dialog.isModal) {
+                const dialog_config = this.getDialogConfig(dialog);
+                if (!dialog_config) {
+                    continue;
+                }
+                UIConfig.popupBgAlpha = dialog_config.shadowAlpha;
+                UIConfig.popupBgColor = dialog_config.shadowColor;
+                if (dialog_config.closeOnSide) {
+                    maskLayer.offAllCaller(dialog_manager);
+                    maskLayer.once(Laya.Event.CLICK, dialog_manager, () => {
+                        dialog.close();
+                    });
+                }
 
-    /**
-     * 关闭对话框。
-     * @param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-     */
-    public close(dialog: HonorDialog) {
-        this.clearDialogEffect(dialog);
-        if (
-            dialog.closeEffect != null &&
-            dialog.closeEffect instanceof Laya.Handler
-        ) {
-            dialog.closeEffect.runWith([dialog]);
-        } else {
-            this.doClose(dialog);
-        }
-    }
-
-    /**
-     * 执行关闭对话框。
-     * @param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-     */
-    public doClose(dialog: HonorDialog) {
-        const { dialog_list } = this;
-        super.doClose(dialog);
-        if (!dialog.autoDestroyAtClosed) {
-            directorView.recoverView(dialog);
-        }
-        for (const [i, item] of dialog_list.entries()) {
-            if (item.dialog === dialog) {
-                dialog_list.splice(i, 1);
-            }
-        }
-        Laya.timer.callLater(this, this.checkMask);
-    }
-
-    /**
-     * 关闭所有的对话框。
-     */
-    public closeAll() {
-        const content = this.viewContent;
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i) as HonorDialog;
-            /** 背景蒙层会直接清除 */
-            if (item.name === this.maskLayerName) {
-                break;
-            }
-            this.close(item);
-        }
-    }
-
-    /**
-     * 关闭指定name值的对话框。
-     */
-    public closeDialogByName(name: string) {
-        if (!name) {
-            return;
-        }
-
-        const content = this.viewContent;
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i) as HonorDialog;
-            if (item.name === name) {
-                this.close(item);
+                const { width, height } = maskLayer;
+                maskLayer.graphics.clear(true);
+                maskLayer.graphics.drawRect(
+                    0,
+                    0,
+                    width,
+                    height,
+                    UIConfig.popupBgColor,
+                );
+                maskLayer.alpha = UIConfig.popupBgAlpha;
+                return;
             }
         }
     }
-
-    /**
-     * 根据组关闭所有弹出框
-     * @param group 需要关闭的组名称
-     */
-    public closeDialogsByGroup(group: string) {
-        const content = this.viewContent;
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i) as HonorDialog;
-            if (item && item.group === group) {
-                this.close(item);
-            }
-        }
+    public closeAllDialogs() {
+        this.dialog_manager.closeAll();
     }
-
-    /**
-     * 根据组获取所有对话框
-     * @param group 组名称
-     * @return 对话框数组
-     */
-    public getDialogsByGroup(group: string) {
-        const content = this.viewContent;
-        const arr = [];
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i) as HonorDialog;
-            if (item && item.group === group) {
-                arr.push(item);
-            }
-        }
-        return arr;
+    public getDialogsByGroup(group) {
+        this.dialog_manager.getDialogsByGroup(group);
     }
-
-    /**
-     * 根据name获取所有对话框
-     * @param name 对话框的name
-     * @return 对话框
-     */
+    public closeDialogsByGroup(group) {
+        this.dialog_manager.closeByGroup(group);
+    }
     public getDialogByName(name: string) {
-        const content = this.viewContent;
-        for (let i = content.numChildren - 1; i > -1; i--) {
-            const item = content.getChildAt(i);
-            if (item && item.name === name) {
-                return item;
+        const { open_dialog_list } = this;
+        for (const item of open_dialog_list) {
+            const { dialog } = item;
+            if (dialog.name === name) {
+                return dialog;
+            }
+        }
+    }
+    public closeDialogByName(name: string) {
+        const { open_dialog_list } = this;
+        for (const item of open_dialog_list) {
+            const { dialog } = item;
+            if (dialog.name === name) {
+                return dialog.close();
             }
         }
     }
