@@ -47,7 +47,7 @@ export class DirectorCtor {
      */
     public openDialog(
         url: DialogRefUrl,
-        params?: any[],
+        params: any[] = [],
         config: HonorDialogConfig = {},
         use_exist = false,
     ) {

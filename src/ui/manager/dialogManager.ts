@@ -86,7 +86,9 @@ export class DialogManagerCtor {
         /** 设置dialog的配置 */
         this.setDialogConfig(url, dialog, config);
         dialog_manager.open(dialog, config.closeOther, true);
-        dialog.onMounted(...params);
+        if (dialog.onMounted) {
+            dialog.onMounted(...params);
+        }
         this.setTopDialogConfig(dialog);
         return dialog;
     }
@@ -97,18 +99,15 @@ export class DialogManagerCtor {
         return new Promise((resolve, reject) => {
             /** 使用dialog_pool_list的弹出层 */
             const { dialog_pool_list } = this;
-            let item: DialogInfo;
+            let dialog: DialogInfo;
             for (let i = 0; i < dialog_pool_list.length; i++) {
-                item = dialog_pool_list[i];
+                const item = dialog_pool_list[i];
                 if (item.url === url) {
                     dialog_pool_list.splice(i, 1);
+                    const dialog = item.dialog;
+                    resolve(dialog);
                     break;
                 }
-            }
-            if (item) {
-                const dialog = item.dialog;
-                resolve(dialog);
-                return;
             }
 
             /** 创建弹出层 */

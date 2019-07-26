@@ -100,5 +100,13 @@ async function run(
 
     initState();
 }
+export const Honor = {
+    name,
+    version,
+    run,
+    director,
+    utils,
+    DEBUG_MODE,
+};
 
 export default { name, version, run, director, utils, DEBUG_MODE };
