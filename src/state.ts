@@ -1,6 +1,6 @@
-import { DialogManagerCtor } from './ui/manager/DialogManager';
-import { SceneManagerCtor } from './ui/manager/SceneManager';
-import { LoaderManagerCtor } from './ui/manager/LoaderManager';
+import { DialogManagerCtor } from './ui/dialogManager';
+import { SceneManagerCtor } from './ui/SceneManager';
+import { LoaderManagerCtor } from './ui/LoaderManager';
 import { DirectorCtor } from './ui/director';
 
 export let dialogManager: DialogManagerCtor;

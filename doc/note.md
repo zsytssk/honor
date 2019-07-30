@@ -1,24 +1,44 @@
+-   @todo 场景打开 dialog
+
+    -   director openDialog
+    -   直接调用场景打开 dialog
+
+-   无法支持多个 dialogManager, 所以无法用
+
+-   loading 使用弹出层...
+
+-   dialogManager
+
+-   @ques onMounted 应该放在 onEnable 之后
+
+-   @ques syncBack rmDir
+
+-   @ques onMounted 放在 onEnable 之后
+
+-   @ques onMounted 蒙哥的 onMoutend 的书匈奴
+
+## 2019-07-30 09:17:21
+
 -   @ques 到底还要不要默认的 loading
+-   @todo sceneChangeBeforeListener 可以用 Event 类
 
 ## 2019-07-26 15:21:33
 
--   @todo sceneChangeBeforeListener 可以用 Event 类
-
-*   @ques 如何设置默认的 loadingScene
+-   @ques 如何设置默认的 loadingScene
 
     -   dialog + 场景的 scene
 
-*   @ques Laya.dialog | laya.Scene 的 loadingPage 是否是一样的
+-   @ques Laya.dialog | laya.Scene 的 loadingPage 是否是一样的
 
-*   @ques 场景有没有必要回收...
+-   @ques 场景有没有必要回收...
 
-*   @ques Login resize 会不会自动调用
+-   @ques Login resize 会不会自动调用
 
-*   @ques scene Test
+-   @ques scene Test
 
-*   @ques scene 切换 loading 会在弹出层上面吗...
+-   @ques scene 切换 loading 会在弹出层上面吗...
 
-*   @ques dialogManager onMouted 在 onEabled 之后处理
+-   @ques dialogManager onMouted 在 onEabled 之后处理
 
 ## 2019-07-26 10:13:41
 

@@ -6,8 +6,8 @@ import {
     untilInit,
 } from '../state';
 import { ResItem } from '../utils/loadRes';
-import { DialogRefUrl } from './manager/DialogManager';
-import { SceneChangeListener, SceneRefUrl } from './manager/SceneManager';
+import { DialogRefUrl } from './dialogManager';
+import { SceneChangeListener, SceneRefUrl } from './SceneManager';
 import { HonorDialogConfig, HonorScene, ViewType } from './view';
 
 export class DirectorCtor {

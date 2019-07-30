@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { cp } from './ls/main';
 import { rm } from './ls/rm';
+import { rmdir } from './ls/asyncUtil';
 
 const type = process.argv.slice(2)[0];
 const dist = 'Z:\\libs\\honor';
@@ -62,15 +63,19 @@ export async function generateType2() {
 }
 
 async function release() {
+    await rm(dist);
     cp(src, dist);
 }
 async function release2() {
+    await rm(dist2);
     cp(src, dist2);
 }
 
 async function syncBack() {
+    await rm(src);
     cp(dist, src);
 }
 async function syncBack2() {
+    await rm(src);
     cp(dist2, src);
 }

@@ -1,8 +1,8 @@
-import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from '../view';
+import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from './view';
 import { injectAfter } from 'honor/utils/tool';
 import { loaderManager } from 'honor/state';
 
-export type DialogRefUrl = string | Ctor<HonorDialog>;
+export type DialogRefUrl = string | Ctor<HonorDialog> | HonorDialog;
 type DialogInfo = {
     url: DialogRefUrl;
     dialog: HonorDialog;
@@ -46,7 +46,7 @@ export class DialogManagerCtor {
         config?: HonorDialogConfig,
         use_exist?: boolean,
     ) {
-        const { wait_dialog_task, open_dialog_list, dialog_manager } = this;
+        const { wait_dialog_task, open_dialog_list } = this;
 
         /** 使用正在打开或者已经打开的弹出层... */
         let dialog: HonorDialog;
@@ -71,7 +71,7 @@ export class DialogManagerCtor {
         /** 如果没有找到dialog(use_exist=true), 后者use_exist=false */
         if (!dialog) {
             /** 已经打开dialog, 从wait_dialog_task移除, 放到open_dialog_list中 */
-            const wait_open_dialog = this.toOpenDialog(url, config.closeOther);
+            const wait_open_dialog = this.toOpenDialog(url);
             wait_dialog_task.set(
                 url,
                 wait_open_dialog.then(_dialog => {
@@ -84,18 +84,15 @@ export class DialogManagerCtor {
         }
 
         /** 设置dialog的配置 */
-        this.setDialogConfig(url, dialog, config);
+        const dialog_config = this.setDialogConfig(url, dialog, config);
         if (dialog.onMounted) {
             dialog.onMounted(...params);
         }
-        dialog_manager.open(dialog, config.closeOther, true);
+        dialog.open(dialog_config.closeOther);
         this.checkMask();
         return dialog;
     }
-    public toOpenDialog(
-        url: DialogRefUrl,
-        close_other = false,
-    ): Promise<HonorDialog> {
+    public toOpenDialog(url: DialogRefUrl): Promise<HonorDialog> {
         return new Promise((resolve, reject) => {
             /** 使用dialog_pool_list的弹出层 */
             const { dialog_pool_list } = this;
@@ -104,8 +101,7 @@ export class DialogManagerCtor {
                 if (item.url === url) {
                     dialog_pool_list.splice(i, 1);
                     const dialog = item.dialog;
-                    resolve(dialog);
-                    break;
+                    return resolve(dialog);
                 }
             }
 
@@ -114,7 +110,7 @@ export class DialogManagerCtor {
                 loaderManager.loadScene('Dialog', url).then(_dialog => {
                     resolve(_dialog as HonorDialog);
                 });
-            } else {
+            } else if (typeof url === 'function') {
                 const dialog = new url();
                 if (dialog.active) {
                     resolve(dialog);
@@ -123,6 +119,8 @@ export class DialogManagerCtor {
                         return resolve(dialog);
                     });
                 }
+            } else if (url instanceof Laya.Dialog) {
+                return resolve(url);
             }
         });
     }
@@ -151,6 +149,7 @@ export class DialogManagerCtor {
                 config,
             });
         }
+        return config;
     }
     private getDialogConfig(dialog: HonorDialog): HonorDialogConfig {
         const { open_dialog_list } = this;
