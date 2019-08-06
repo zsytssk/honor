@@ -1,8 +1,9 @@
 import { loaderManager } from 'honor/state';
 import { HonorScene } from './view';
+import { nodeIsReady } from '../utils/tool';
 export type SceneChangeListener = (
     cur1: string,
-    cur2: string
+    cur2: string,
 ) => boolean | void;
 export type SceneChangeData = { cur: string; prev: string };
 export type SceneClassMap = { [key: string]: HonorScene };
@@ -79,11 +80,11 @@ export class SceneManagerCtor {
             const before_handle = this.callChangeListener(
                 'before',
                 this.cur_scene && this.cur_scene.url,
-                url
+                url,
             );
             if (before_handle) {
                 return reject(
-                    `has callChangeListener interrupt open:> ${url} `
+                    `has callChangeListener interrupt open:> ${url} `,
                 );
             }
 
@@ -92,12 +93,12 @@ export class SceneManagerCtor {
                 if (typeof url === 'string') {
                     scene = (await loaderManager.loadScene(
                         'Scene',
-                        url
+                        url,
                     )) as HonorScene;
                 } else if (typeof url === 'function') {
                     scene = new url();
                     await new Promise((_resolve, _reject) => {
-                        if (!scene.active) {
+                        if (nodeIsReady(scene)) {
                             return _resolve(scene);
                         }
                         scene.once('onViewCreated', this, () => {

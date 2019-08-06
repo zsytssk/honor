@@ -7,3 +7,7 @@ export function injectAfter(ctor: any, fun_name: string, func: Func<any>) {
         return result;
     };
 }
+
+export function nodeIsReady(node: Laya.Node) {
+    return node._getBit(/*laya.Const.NOT_READY*/ 0x08);
+}

@@ -1,5 +1,5 @@
 import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from './view';
-import { injectAfter } from 'honor/utils/tool';
+import { injectAfter, nodeIsReady } from 'honor/utils/tool';
 import { loaderManager } from 'honor/state';
 
 export type DialogRefUrl = string | Ctor<HonorDialog> | HonorDialog;
@@ -112,7 +112,7 @@ export class DialogManagerCtor {
                 });
             } else if (typeof url === 'function') {
                 const dialog = new url();
-                if (dialog.active) {
+                if (nodeIsReady(dialog)) {
                     resolve(dialog);
                 } else {
                     dialog.once('onViewCreated', this, () => {
