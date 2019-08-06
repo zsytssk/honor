@@ -1,6 +1,6 @@
 import { loaderManager } from 'honor/state';
 import { HonorScene } from './view';
-import { nodeIsReady } from '../utils/tool';
+import { nodeIsReady, createScene } from '../utils/tool';
 export type SceneChangeListener = (
     cur1: string,
     cur2: string,
@@ -98,11 +98,8 @@ export class SceneManagerCtor {
                 } else if (typeof url === 'function') {
                     scene = new url();
                     await new Promise((_resolve, _reject) => {
-                        if (nodeIsReady(scene)) {
-                            return _resolve(scene);
-                        }
-                        scene.once('onViewCreated', this, () => {
-                            return _resolve(scene);
+                        createScene(url).then(dialog => {
+                            return _resolve(dialog);
                         });
                     });
                 } else if (url instanceof Laya.Scene) {

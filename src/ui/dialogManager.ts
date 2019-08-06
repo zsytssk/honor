@@ -1,5 +1,5 @@
 import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from './view';
-import { injectAfter, nodeIsReady } from 'honor/utils/tool';
+import { injectAfter, nodeIsReady, createScene } from 'honor/utils/tool';
 import { loaderManager } from 'honor/state';
 
 export type DialogRefUrl = string | Ctor<HonorDialog> | HonorDialog;
@@ -111,14 +111,9 @@ export class DialogManagerCtor {
                     resolve(_dialog as HonorDialog);
                 });
             } else if (typeof url === 'function') {
-                const dialog = new url();
-                if (nodeIsReady(dialog)) {
-                    resolve(dialog);
-                } else {
-                    dialog.once('onViewCreated', this, () => {
-                        return resolve(dialog);
-                    });
-                }
+                createScene(url).then(dialog => {
+                    return resolve(dialog);
+                });
             } else if (url instanceof Laya.Dialog) {
                 return resolve(url);
             }
