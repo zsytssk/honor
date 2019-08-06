@@ -2,7 +2,7 @@ import { loaderManager } from 'honor/state';
 import { HonorScene } from './view';
 export type SceneChangeListener = (
     cur1: string,
-    cur2: string,
+    cur2: string
 ) => boolean | void;
 export type SceneChangeData = { cur: string; prev: string };
 export type SceneClassMap = { [key: string]: HonorScene };
@@ -16,9 +16,7 @@ export class SceneManagerCtor {
     public scene_pool = new Map() as SceneMap;
     private cur_scene: HonorScene;
     private dialog_manager = new Laya.DialogManager();
-    constructor() {
-        console.log(this.dialog_manager);
-    }
+    constructor() {}
     public onResize(width, height) {
         if (this.cur_scene) {
             this.cur_scene.size(width, height);
@@ -81,11 +79,11 @@ export class SceneManagerCtor {
             const before_handle = this.callChangeListener(
                 'before',
                 this.cur_scene && this.cur_scene.url,
-                url,
+                url
             );
             if (before_handle) {
                 return reject(
-                    `has callChangeListener interrupt open:> ${url} `,
+                    `has callChangeListener interrupt open:> ${url} `
                 );
             }
 
@@ -94,17 +92,20 @@ export class SceneManagerCtor {
                 if (typeof url === 'string') {
                     scene = (await loaderManager.loadScene(
                         'Scene',
-                        url,
+                        url
                     )) as HonorScene;
                 } else if (typeof url === 'function') {
                     scene = new url();
                     await new Promise((_resolve, _reject) => {
+                        if (!scene.active) {
+                            return _resolve(scene);
+                        }
                         scene.once('onViewCreated', this, () => {
-                            return resolve(scene);
+                            return _resolve(scene);
                         });
                     });
                 } else if (url instanceof Laya.Scene) {
-                    return resolve(scene);
+                    scene = url;
                 }
             }
 
