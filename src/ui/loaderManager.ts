@@ -43,7 +43,7 @@ export class LoaderManagerCtor {
         }
         let time = 0;
         if (status === false) {
-            time = 500;
+            time = 1000;
         }
         clearTimeout(this[`${type}_timeout`]);
         this[`${type}_timeout`] = setTimeout(() => {

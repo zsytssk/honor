@@ -26,6 +26,7 @@ export function injectProto(
 
 /** 之所以要这个处理, 为了解决外嵌模式需要loadScene本身的资源, 干净的类 class不需要
  *  所有通过 loadScene 有没有调用来监听
+ * 这是hack的方法
  */
 export function createScene<T extends Laya.Scene>(ctor: Ctor<T>): Promise<T> {
     return new Promise((resolve, reject) => {

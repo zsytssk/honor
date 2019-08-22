@@ -1,6 +1,54 @@
 import { HonorDialog, HonorDialogConfig, DEFAULT_CONFIG } from './view';
-import { injectAfter, nodeIsReady, createScene } from 'honor/utils/tool';
+import { injectAfter, createScene } from 'honor/utils/tool';
 import { loaderManager } from 'honor/state';
+
+/**
+ * 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，
+ * 如果不想有任何效果，可以赋值为null
+ */
+const defaultPopupEffect = function(dialog) {
+    dialog._effectTween = Laya.Tween.from(
+        dialog,
+        {
+            x: Laya.stage.width / 2,
+            y: Laya.stage.height / 2,
+            scaleX: 0.2,
+            scaleY: 0.2,
+            alpha: 0,
+        },
+        300,
+        Laya.Ease.backOut,
+        Laya.Handler.create(this, this.doOpen, [dialog]),
+        0,
+        false,
+        false,
+    );
+};
+/** 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，
+ * 如果不想有任何效果，可以赋值为null
+ */
+const defaultCloseEffect = function(dialog) {
+    dialog._effectTween = Laya.Tween.to(
+        dialog,
+        {
+            x: Laya.stage.width / 2,
+            y: Laya.stage.height / 2,
+            scaleX: 0,
+            scaleY: 0,
+            alpha: 0,
+        },
+        300,
+        Laya.Ease.backIn,
+        Laya.Handler.create(this, () => {
+            dialog.scale(1, 1);
+            dialog.alpha = 1;
+            this.doClose(dialog);
+        }),
+        0,
+        false,
+        false,
+    );
+};
 
 export type DialogRefUrl = string | Ctor<HonorDialog> | HonorDialog;
 type DialogInfo = {
@@ -36,6 +84,14 @@ export class DialogManagerCtor {
             'doOpen',
             this.injectDoOpenAfter.bind(this),
         );
+        dialog_manager.popupEffectHandler = new Laya.Handler(
+            dialog_manager,
+            defaultPopupEffect,
+        );
+        dialog_manager.closeEffectHandler = new Laya.Handler(
+            dialog_manager,
+            defaultCloseEffect,
+        );
         this.dialog_manager = dialog_manager;
     }
 
@@ -45,6 +101,7 @@ export class DialogManagerCtor {
         params?: any[],
         config?: HonorDialogConfig,
         use_exist?: boolean,
+        show_effect?: boolean,
     ) {
         const { wait_dialog_task, open_dialog_list } = this;
 
@@ -88,7 +145,16 @@ export class DialogManagerCtor {
         if (dialog.onMounted) {
             dialog.onMounted(...params);
         }
+
+        /**  */
+        const ori_show_effect = dialog.popupEffect;
+        if (show_effect !== undefined && show_effect === false) {
+            dialog.popupEffect = null;
+        }
         dialog.open(dialog_config.closeOther);
+        if (ori_show_effect) {
+            dialog.popupEffect = ori_show_effect;
+        }
         this.checkMask();
         return dialog;
     }

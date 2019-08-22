@@ -1,3 +1,7 @@
+ie11 promise.all
+release assets 资源...
+honor bug
+
 -   @todo 场景打开 dialog
 
     -   director openDialog

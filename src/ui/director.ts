@@ -49,14 +49,23 @@ export class DirectorCtor {
      * @param url 弹出层
      * @param params 场景 onMounted 接收的参数
      * @param config 弹出层的配置
+     * @param use_exist 使用打开弹出层弹出层
+     * @param show_effect 是否使用打开动画
      */
     public openDialog(
         url: DialogRefUrl,
         params: any[] = [],
         config: HonorDialogConfig = {},
         use_exist = false,
+        show_effect = true,
     ) {
-        return dialogManager.openDialog(url, params, config, use_exist);
+        return dialogManager.openDialog(
+            url,
+            params,
+            config,
+            use_exist,
+            show_effect,
+        );
     }
     public load(res: ResItem[] | string[], type?: ViewType) {
         return loaderManager.load(res, type);
