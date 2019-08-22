@@ -20,23 +20,55 @@ export function formatTime(
         format = [format, format, ''];
     }
 
-    if (total > 60) {
+    if (total >= 60) {
         m = (total / 60) | 0;
     }
-    if (m > 60) {
+    if (m >= 60) {
         h = (m / 60) | 0;
         m = m % 60;
     }
 
     const time_arr = [h, m, s];
-    for (const [index, item] of time_arr.entries()) {
+    for (let i = 0, al = time_arr.length; i < al; i++) {
+        const item = time_arr[i];
         if (min && !item) {
             continue;
         }
         min = false;
-
-        time += formatTimeZone(item) + format[index];
+        time += formatTimeZone(item) + format[i];
     }
+    return time;
+}
+
+/**
+ * @public
+ * 将毫秒转换为`1天1小时1分钟1秒`的格式，小于1的部分将不会出现（精简模式）
+ * @param seconds 秒数
+ *
+ * @return 格式化后的字符串
+ */
+export function formatTimeLight(seconds: number){
+    let time = ''
+    let [d, h, m, s] = [0, 0, 0, seconds%60];
+    if (seconds > 60) {
+        m = (seconds / 60) | 0;
+    }
+    if (m > 60) {
+        h = (m / 60) | 0;
+        m = m % 60;
+    }
+    if (h > 24) {
+        d = (h / 24) | 0;
+        h = h % 24;
+    }
+    const time_arr = [d, h, m, s];
+    const time_unit = ['天', '小时', '分', '秒'];
+    for (const [i, count] of time_arr.entries()) {
+        if (count > 0) {
+            time = `${time}${count}${time_unit[i]}`;
+        }
+    }
+
     return time;
 }
 

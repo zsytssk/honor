@@ -9,7 +9,8 @@
 export function cutStr(text, length) {
     text = text + '';
     var reg = /[^\x00-\xff]/g;
-    if (text.replace(reg, 'mm').length <= length) {
+    const r = text.replace(reg, 'mm');
+    if (r.length <= length) {
         return text;
     }
     var m = Math.floor(length / 2);

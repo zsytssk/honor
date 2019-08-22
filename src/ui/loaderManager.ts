@@ -4,6 +4,8 @@ import { ResItem, loadRes } from 'honor/utils/loadRes';
 type LoadingMap = Map<ViewType, HonorLoadScene>;
 
 export class LoaderManagerCtor {
+    /** 强制, toggleLoading不在有效, 用于有多个loading的情形, 一直显示loading */
+    public force = false;
     private load_map = new Map() as LoadingMap;
     public loadScene(type: ViewType, url: string) {
         return new Promise((resolve, reject) => {
@@ -41,12 +43,15 @@ export class LoaderManagerCtor {
         if (!type) {
             return;
         }
+        if (this.force) {
+            return;
+        }
         let time = 0;
         if (status === false) {
             time = 1000;
         }
-        clearTimeout(this[`${type}_timeout`]);
-        this[`${type}_timeout`] = setTimeout(() => {
+        clearTimeout(this[`${type}_timeout_${status}`]);
+        this[`${type}_timeout_${status}`] = setTimeout(() => {
             this.setLoadViewVisible(type, status);
         }, time);
     }
@@ -63,14 +68,16 @@ export class LoaderManagerCtor {
 
         this.load_map.set(type, scene);
     }
-
-    public setLoadViewVisible(type: ViewType, visible: boolean) {
+    /**
+     * @param force 强制, toggleLoading不在有效
+     */
+    public setLoadViewVisible(type: ViewType, visible: boolean, force = false) {
         const load_scene = this.load_map.get(type);
+        this.force = force;
         if (!load_scene) {
             return;
         }
         if (visible) {
-            this.setLoadProgress(type, 0);
             load_scene.onShow();
         } else {
             load_scene.onHide();

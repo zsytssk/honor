@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG = {
     closeOnSide: true,
     closeByGroup: false,
     closeByName: false,
-    shadowAlpha: 0.5,
+    shadowAlpha: 0.7,
     shadowColor: '#000000',
     autoClose: false,
 } as HonorDialogConfig;

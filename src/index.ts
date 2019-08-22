@@ -66,7 +66,6 @@ async function run(
     }
     Laya.alertGlobalError = false;
 
-    const { versionPath } = extern_config;
     let { defaultVersion } = extern_config;
     defaultVersion = defaultVersion || '0';
     Laya.URL.customFormat = url => {
@@ -95,11 +94,16 @@ async function run(
     });
     start_task.push(fileconfig_task);
 
+    const { versionPath } = extern_config;
     if (versionPath) {
         start_task.push(loadRes([versionPath]));
     }
+
     await Promise.all(start_task);
-    Laya.URL.version = Laya.loader.getRes(versionPath);
+
+    if (versionPath) {
+        Laya.URL.version = Laya.loader.getRes(versionPath);
+    }
 
     initState();
 }

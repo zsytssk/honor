@@ -7,6 +7,9 @@ import { loaderManager } from 'honor/state';
  * 如果不想有任何效果，可以赋值为null
  */
 const defaultPopupEffect = function(dialog) {
+    if (dialog._effectTween) {
+        (dialog._effectTween as Laya.Tween).complete();
+    }
     dialog._effectTween = Laya.Tween.from(
         dialog,
         {
@@ -18,7 +21,11 @@ const defaultPopupEffect = function(dialog) {
         },
         300,
         Laya.Ease.backOut,
-        Laya.Handler.create(this, this.doOpen, [dialog]),
+        Laya.Handler.create(this, () => {
+            dialog.scale(1, 1);
+            dialog.alpha = 1;
+            this.doOpen(dialog);
+        }),
         0,
         false,
         false,
@@ -28,6 +35,10 @@ const defaultPopupEffect = function(dialog) {
  * 如果不想有任何效果，可以赋值为null
  */
 const defaultCloseEffect = function(dialog) {
+    if (dialog._effectTween) {
+        (dialog._effectTween as Laya.Tween).complete();
+    }
+
     dialog._effectTween = Laya.Tween.to(
         dialog,
         {
@@ -303,5 +314,11 @@ export class DialogManagerCtor {
                 return dialog.close();
             }
         }
+    }
+    /** 隐藏遮罩 */
+    public hideMask(visible) {
+        const { dialog_manager } = this;
+        const { maskLayer } = dialog_manager;
+        maskLayer.visible = visible;
     }
 }
