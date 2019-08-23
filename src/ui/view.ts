@@ -27,6 +27,7 @@ export const DEFAULT_CONFIG = {
 
 /** Honor 中 dialog支持的接口 */
 export interface HonorDialog extends Laya.Dialog {
+    HonorEffectTween?: Laya.Tween;
     config?: HonorDialogConfig;
     /** 弹出层打开之前调用... */
     onMounted?(...params: any[]): void;

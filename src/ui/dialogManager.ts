@@ -6,11 +6,11 @@ import { loaderManager } from 'honor/state';
  * 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，
  * 如果不想有任何效果，可以赋值为null
  */
-const defaultPopupEffect = function(dialog) {
-    if (dialog._effectTween) {
-        (dialog._effectTween as Laya.Tween).complete();
+const defaultPopupEffect = function(dialog: HonorDialog) {
+    if (dialog.HonorEffectTween) {
+        (dialog.HonorEffectTween as Laya.Tween).complete();
     }
-    dialog._effectTween = Laya.Tween.from(
+    dialog.HonorEffectTween = Laya.Tween.from(
         dialog,
         {
             x: Laya.stage.width / 2,
@@ -22,6 +22,7 @@ const defaultPopupEffect = function(dialog) {
         300,
         Laya.Ease.backOut,
         Laya.Handler.create(this, () => {
+            dialog.HonorEffectTween = undefined;
             dialog.scale(1, 1);
             dialog.alpha = 1;
             this.doOpen(dialog);
@@ -34,12 +35,12 @@ const defaultPopupEffect = function(dialog) {
 /** 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，
  * 如果不想有任何效果，可以赋值为null
  */
-const defaultCloseEffect = function(dialog) {
-    if (dialog._effectTween) {
-        (dialog._effectTween as Laya.Tween).complete();
+const defaultCloseEffect = function(dialog: HonorDialog) {
+    if (dialog.HonorEffectTween) {
+        (dialog.HonorEffectTween as Laya.Tween).complete();
     }
 
-    dialog._effectTween = Laya.Tween.to(
+    dialog.HonorEffectTween = Laya.Tween.to(
         dialog,
         {
             x: Laya.stage.width / 2,
@@ -51,6 +52,7 @@ const defaultCloseEffect = function(dialog) {
         300,
         Laya.Ease.backIn,
         Laya.Handler.create(this, () => {
+            dialog.HonorEffectTween = undefined;
             dialog.scale(1, 1);
             dialog.alpha = 1;
             this.doClose(dialog);
